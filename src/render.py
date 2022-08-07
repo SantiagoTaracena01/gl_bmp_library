@@ -127,9 +127,12 @@ class Render(object):
       raise Exception("Color is out of range (0, 1).")
 
   # Función que escribe el archivo .bmp con la imagen finalizada.
-  def gl_finish(self, filename: str = "image.bmp") -> None:
+  def gl_finish(self, filename: str = "./images/image.bmp") -> None:
 
-    file = open(filename, "bw")
+    bmp_filename: str = filename if filename.endswith(".bmp") else f"{filename}.bmp"
+    actual_filename: str = bmp_filename if bmp_filename.startswith("./images/") else f"./images/{bmp_filename}"
+
+    file = open(actual_filename, "bw")
 
     file.write(utils.char("B"))
     file.write(utils.char("M"))
