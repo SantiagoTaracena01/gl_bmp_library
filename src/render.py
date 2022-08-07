@@ -22,7 +22,7 @@ class Render(object):
   __viewport_y_coordinate: int = 0
 
   # Constantes del render.
-  __MAX_DIMENSION: int = 2147483647 # MAX WIDTH/HEIGHT 23169
+  __MAX_DIMENSION: int = 2147483647
   __FILE_HEADER_SIZE: int = 14
   __IMAGE_HEADER_SIZE: int = 40
   __HEADER_SIZE: int = (__FILE_HEADER_SIZE + __IMAGE_HEADER_SIZE)
