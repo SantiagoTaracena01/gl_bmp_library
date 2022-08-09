@@ -12,9 +12,25 @@ HEIGHT: int = 500
 
 my_render = Render()
 my_render.gl_create_window(WIDTH, HEIGHT)
-my_render.gl_viewport_color(0.8, 0.8, 1)
-my_render.gl_viewport(125, 125, 250, 250)
-my_render.gl_vertex(125, 125)
-my_render.gl_color(0.25, 0.25, 0.8)
-my_render.gl_relative_vertex(0.75, -0.75)
-my_render.gl_finish("./images/output.bmp")
+my_render.gl_viewport_color(0.9, 0.9, 1)
+my_render.gl_viewport(0, 0, WIDTH, HEIGHT)
+
+"""
+(-0.70, -0.40)
+(-0.25, -0.70)
+(-0.25, -0.30)
+(-0.70, +0.00)
+"""
+
+# Pared izquierda de la casa.
+my_render.gl_relative_line(-0.70, -0.40, -0.25, -0.70)
+my_render.gl_relative_line(-0.25, -0.70, -0.25, -0.30)
+my_render.gl_relative_line(-0.25, -0.30, -0.70, 0)
+my_render.gl_relative_line(-0.70, 0, -0.70, -0.40)
+
+# Pared frontal de la casa.
+my_render.gl_relative_line(-0.25, -0.70, 0.05, -0.60)
+my_render.gl_relative_line(0.05, -0.60, 0.05, -0.35)
+my_render.gl_relative_line(0.05, -0.35, 0.25, -0.25)
+
+my_render.gl_finish("output.bmp")

@@ -60,15 +60,15 @@ class Render(object):
   # Función que crea un viewport sobre el cuál dibujar.
   def gl_viewport(self, x: int, y: int, width: int, height: int) -> None:
 
-    if ((x < width) and (y < height) and (width < self.__width) and (height < self.__height)):
+    if ((x < width) and (y < height) and (width <= self.__width) and (height <= self.__height)):
 
       self.__viewport_x_coordinate = x
       self.__viewport_y_coordinate = y
       self.__viewport_width = width
       self.__viewport_height = height
 
-      for w in range(self.__viewport_width + 1):
-        for h in range(self.__viewport_height + 1):
+      for w in range(self.__viewport_width):
+        for h in range(self.__viewport_height):
           self.__framebuffer[self.__viewport_y_coordinate + h][self.__viewport_x_coordinate + w] = self.__viewport_color
 
     else:
@@ -91,31 +91,31 @@ class Render(object):
     else:
       raise Exception("Color is out of range (0, 1).")
 
+  # Función que convierte coordenadas absolutas a relativas.
+  def __relative_to_absolute_conversion(self, x: int, y: int) -> tuple[int, int]:
+
+    cx, cy = (self.__viewport_width // 2), (self.__viewport_height // 2)
+    return (round((cx * x) + cx + self.__viewport_x_coordinate), round((cy * y) + cy + self.__viewport_y_coordinate))
+
   # Función que coloca un punto en la pantalla con coordenadas absolutas.
   def gl_vertex(self, x: int, y: int) -> None:
 
     if (((-1 * self.__viewport_width) <= x <= self.__viewport_width) and ((-1 * self.__viewport_height) <= y <= self.__viewport_height)):
       self.__framebuffer[y + self.__viewport_y_coordinate][x + self.__viewport_x_coordinate] = self.__vertex_color
     else:
-      raise Exception(f"Drawing is out of range [[0, {self.__width}], [0, {self.__height}]].")
-
-  # Función que convierte coordenadas absolutas a relativas.
-  def __relative_to_absolute_conversion(self, x, y) -> tuple[int, int]:
-
-    cx, cy = (self.__viewport_width // 2), (self.__viewport_height // 2)
-    return (((cx * x) + cx + self.__viewport_x_coordinate), ((cy * y) + cy + self.__viewport_y_coordinate))
+      raise Exception(f"Drawing is out of range [[0, {self.__viewport_width}], [0, {self.__viewport_height}]].")
 
   # Función que coloca un punto en la pantalla con coordenadas relativas.
-  def gl_relative_vertex(self, x, y):
+  def gl_relative_vertex(self, x: float, y: float) -> None:
 
     if ((-1 <= x <= 1) and (-1 <= y <= 1)):
       px, py = self.__relative_to_absolute_conversion(x, y)
-      self.__framebuffer[round(px)][round(py)] = self.__vertex_color
+      self.__framebuffer[px][py] = self.__vertex_color
     else:
       raise Exception(f"Drawing is out of range [[-1, 1], [-1, 1]].")
 
-  # Función que cambia el color de gl_point() y gl_vertex().
-  def gl_color(self, r, g, b):
+  # Función que cambia el color de los dibujos realizados.
+  def gl_color(self, r: float, g: float, b: float) -> None:
 
     if ((0 <= r <= 1) or (0 <= g <= 1) or (0 <= b <= 1)):
       self.__vertex_color = utils.color(
@@ -125,6 +125,57 @@ class Render(object):
       )
     else:
       raise Exception("Color is out of range (0, 1).")
+
+  # Función que dibuja una línea en la pantalla.
+  def gl_line(self, x0: int, y0: int, x1: int, y1: int) -> None:
+
+    if ((0 <= x0 <= self.__viewport_width) and (0 <= y0 <= self.__viewport_height) and (0 <= x1 <= self.__viewport_width) and (0 <= y1 <= self.__viewport_height)):
+
+      dy = abs(y1 - y0)
+      dx = abs(x1 - x0)
+
+      steep = (dy > dx)
+
+      if (steep):
+        x0, y0 = y0, x0
+        x1, y1 = y1, x1
+
+      if (x0 > x1):
+        x0, x1 = x1, x0
+        y0, y1 = y1, y0
+
+      dy = abs(y1 - y0)
+      dx = abs(x1 - x0)
+
+      offset = 0
+      threshold = dx
+      y = y0
+
+      for x in range(x0, x1):
+
+        offset += (dy * 2)
+
+        if (offset >= threshold):
+          y += 1 if (y0 < y1) else -1
+          threshold += dx * 2
+
+        if (steep):
+          self.gl_vertex(x, y)
+        else:
+          self.gl_vertex(y, x)
+
+    else:
+      raise Exception(f"Drawing is out of range [[0, {self.__viewport_width}], [0, {self.__viewport_height}]].")
+
+  # Función que dibuja una linea con coordenadas relativas.
+  def gl_relative_line(self, x0: float, y0: float, x1: float, y1: float) -> None:
+
+    if ((-1 <= x0 <= 1) and (-1 <= y0 <= 1) and (-1 <= x1 <= 1) and (-1 <= y1 <= 1)):
+      x0, y0 = self.__relative_to_absolute_conversion(x0, y0)
+      x1, y1 = self.__relative_to_absolute_conversion(x1, y1)
+      self.gl_line(x0, y0, x1, y1)
+    else:
+      raise Exception(f"Drawing is out of range [[-1, 1], [-1, 1]].")
 
   # Función que escribe el archivo .bmp con la imagen finalizada.
   def gl_finish(self, filename: str = "./images/image.bmp") -> None:
