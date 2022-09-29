@@ -8,7 +8,7 @@ Santiago Taracena Puga (20017)
 # Módulos necesarios
 import struct
 
-# Funciones extra utilizadas.
+# Funciones lambda extra utilizadas.
 color = lambda r, g, b: bytes([b, g, r])
 char = lambda character: struct.pack("=c", character.encode("ascii"))
 word = lambda word: struct.pack("=h", word)
