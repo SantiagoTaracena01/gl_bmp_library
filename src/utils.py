@@ -15,8 +15,8 @@ word = lambda word: struct.pack("=h", word)
 dword = lambda dword: struct.pack("=l", dword)
 
 # Constantes extra utilizadas.
-BLACK: bytes = color(0, 0, 0)
-WHITE: bytes = color(255, 255, 255)
-RED: bytes = color(255, 0, 0)
-GREEN: bytes = color(0, 255, 0)
-BLUE: bytes = color(0, 0, 255)
+BLACK = color(0, 0, 0)
+WHITE = color(255, 255, 255)
+RED = color(255, 0, 0)
+GREEN = color(0, 255, 0)
+BLUE = color(0, 0, 255)

@@ -5,25 +5,39 @@ Librería de archivos .bmp
 Santiago Taracena Puga (20017)
 """
 
+# Definición de la clase Obj para leer archivos .obj.
 class Obj(object):
-  
+
+  # Método constructor de la clase Obj.
   def __init__(self, filename):
-    
+
+    # Lectura de todas las líneas del archivo .obj.
     with open(filename) as file:
-      self.__lines = file.read().splitlines()
-    
-    self.__vertices = []
-    self.__faces = []
-    
-    for line in self.__lines:
+      self.lines = file.read().splitlines()
+
+    # Definición de las caras y los vértices del archivo.
+    self.faces = []
+    self.vertices = []
+    self.__read_obj_lines()
+
+  # Método que obtiene las caras y los vértices del archivo .obj.
+  def __read_obj_lines(self):
+
+    # Iteración sobre cada línea del archivo.
+    for line in self.lines:
+
+      # Si la longitud de la línea es menor a tres, no es una línea útil.
+      if (len(line.split(" ")) < 3):
+        continue
+
+      # Prefijo y valor de cada línea útil del archivo.
       prefix, value = line.split(" ", 1)
-      if (prefix == "v"):
-        self.__vertices.append(list(map(float, value.split(" "))))
-      elif (prefix == "f"):
-        self.__faces.append([list(map(int, face.split("/"))) for face in value.split(" ")])
+      value = value.strip()
 
-  def get_vertices(self):
-    return self.__vertices
+      # Obtención de las caras del archivo.        
+      if (prefix == "f"):
+        self.faces.append([list(map(int, face.split("/"))) for face in value.split(" ")])
 
-  def get_faces(self):
-    return self.__faces
+      # Obtención de los vértices del archivo.
+      elif (prefix == "v"):
+        self.vertices.append(list(map(float, value.split(" "))))

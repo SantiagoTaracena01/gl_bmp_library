@@ -7,59 +7,46 @@ Santiago Taracena Puga (20017)
 
 # Módulos/librerías importadas para el desarrollo de main.py.
 from renderer import Renderer
-# from obj import Obj
+import time
 
 # Ancho y alto de la imagen creada.
 WIDTH = 1000
 HEIGHT = 1000
 
 renderer = Renderer()
+renderer.gl_color(0, 0, 0)
 renderer.gl_create_window(WIDTH, HEIGHT)
-renderer.gl_color(0, 0.25, 0.5)
 renderer.gl_viewport(0, 0, WIDTH, HEIGHT)
-renderer.gl_color(1, 1, 1)
 
-"""
-(-0.70, -0.40)
-(-0.25, -0.70)
-(-0.25, -0.30)
-(-0.70, +0.00)
-"""
+renderer.gl_color(0, 0.5, 1)
 
-# Pared izquierda de la casa.
-renderer.gl_relative_line(-0.70, -0.40, -0.25, -0.70)
-renderer.gl_relative_line(-0.25, -0.70, -0.25, -0.30)
-renderer.gl_relative_line(-0.25, -0.30, -0.70, 0)
-renderer.gl_relative_line(-0.70, 0, -0.70, -0.40)
+scale_factor = (25, 25)
+translate_factor = (500, 500)
 
-# Pared frontal de la casa.
-renderer.gl_relative_line(-0.25, -0.70, 0.05, -0.60)
-renderer.gl_relative_line(0.05, -0.60, 0.05, -0.35)
-renderer.gl_relative_line(0.05, -0.35, 0.25, -0.30)
-renderer.gl_relative_line(0.25, -0.30, 0.25, -0.50)
-renderer.gl_relative_line(0.25, -0.50, 0.55, -0.40)
-renderer.gl_relative_line(0.55, -0.40, 0.55, 0.00)
-renderer.gl_relative_line(0.55, 0.00, 0.10, 0.30)
-renderer.gl_relative_line(0.10, 0.30, -0.25, -0.30)
+renderer.gl_load_obj("./models/hylian_shield.obj", scale_factor, translate_factor)
 
-# Techo de la casa.
-renderer.gl_relative_line(-0.35, 0.45, -0.70, 0.00)
-renderer.gl_relative_line(-0.35, 0.45, 0.10, 0.30)
+# renderer.gl_color(1, 0, 0)
+# renderer.gl_fill_polygon([
+#   (165, 380), (185, 360), (180, 330), (207, 345), (233, 330), 
+#   (230, 360), (250, 380), (220, 385), (205, 410), (193, 383)
+# ])
 
-# Chimenea de la casa.
-renderer.gl_relative_line(-0.15, 0.385, -0.15, 0.55)
-renderer.gl_relative_line(-0.15, 0.55, -0.10, 0.55)
-renderer.gl_relative_line(-0.10, 0.55, -0.10, 0.3675)
+# renderer.gl_color(0, 1, 0)
+# renderer.gl_fill_polygon([(321, 335), (288, 286), (339, 251), (374, 302)])
 
-renderer.gl_finish("./images/house.bmp")
+# renderer.gl_color(0, 0, 1)
+# renderer.gl_fill_polygon([(377, 249), (411, 197), (436, 249)])
 
-# square = [(250, 250), (750, 250), (750, 750), (250, 750)]
-# right_square = [(450, 250), (950, 250), (950, 750), (450, 750)]
+# renderer.gl_color(0, 1, 1)
+# renderer.gl_fill_polygon([
+#   (413, 177), (448, 159), (502, 88), (553, 53), (535, 36), (676, 37), (660, 52),
+#   (750, 145), (761, 179), (672, 192), (659, 214), (615, 214), (632, 230), (580, 230),
+#   (597, 215), (552, 214), (517, 144), (466, 180)
+# ])
 
-# last_point = right_square[-1]
+# renderer.gl_color(1, 1, 0)
+# renderer.gl_fill_polygon([(682, 175), (708, 120), (735, 148), (739, 170)])
 
-# for point in right_square:
-#   my_render.gl_line(*last_point, *point)
-#   last_point = point
-
-# my_render.gl_load_obj("./models/cube.obj")
+start = time.time()
+filename = renderer.gl_finish()
+print(f"\nRendering process has been finished in {round((time.time() - start), 4)} seconds! Check {filename}!\n")
