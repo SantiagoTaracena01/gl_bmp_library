@@ -146,22 +146,44 @@ class Renderer(object):
       x1, y1 = self.__relative_to_absolute_conversion(x1, y1)
       self.gl_line(x0, y0, x1, y1)
 
+  # Función que calcula si un punto está dentro de un polígono.
   def __is_inside(self, x, y, polygon):
+
+    # Variables útiles para el proceso.
     result = False
     vertices = len(polygon)
     value = (vertices - 1)
+
+    # Iteración sobre cada vértice del polígono.
     for i in range(vertices):
+
+      # Descarte de puntos que sean parte de las líneas fronterizas del polígono.
       if ((x == polygon[i][0]) and (y == polygon[i][1])):
         return True
+
+      # Evaluación de la elevación de cada punto del polígono.
       if ((polygon[i][1] > y) != (polygon[value][1] > y)):
-        slope = (x - polygon[i][0]) * (polygon[value][1] - polygon[i][1]) - (polygon[value][0] - polygon[i][0]) * (y - polygon[i][1])
+
+        # Cálculo de la pendiente entre los dos puntos.
+        upper_slope_component = ((x - polygon[i][0]) * (polygon[value][1] - polygon[i][1]))
+        lower_slope_component = ((polygon[value][0] - polygon[i][0]) * (y - polygon[i][1]))
+        slope = (upper_slope_component - lower_slope_component)
+
+        # Si la pendiente es cero, el punto está dentro.
         if (slope == 0):
           return True
+
+        # Si las pendientes siguen siendo diferentes, recalculamos el resultado.
         elif ((slope < 0) != (polygon[value][1] < polygon[i][1])):
           result = not result
+
+      # Cambio de vértice actual.
       value = i
+
+    # Retorno del resultado.
     return result
 
+  # Función que dibuja y colorea un polígono de puntos dados.
   def gl_fill_polygon(self, polygon):
     for x in range(self.__width):
       for y in range(self.__height):
