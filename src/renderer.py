@@ -149,15 +149,17 @@ class Renderer(object):
   def __is_inside(self, x, y, polygon):
     result = False
     vertices = len(polygon)
-    x0, y0 = polygon[0]
-    for i in range((vertices + 1)):
-      x1, y1 = polygon[(i % vertices)]
-      if ((min(y0, y1) < y < max(y0, y1)) and (x <= max(x0, x1))):
-        if (y0 != y1):
-          x_interior = (y - y0) * (x1 - x0) / (y1 - y0) + x0
-        if (x_interior and ((x0 == x1) or (x <= x_interior))):
+    value = (vertices - 1)
+    for i in range(vertices):
+      if ((x == polygon[i][0]) and (y == polygon[i][1])):
+        return True
+      if ((polygon[i][1] > y) != (polygon[value][1] > y)):
+        slope = (x - polygon[i][0]) * (polygon[value][1] - polygon[i][1]) - (polygon[value][0] - polygon[i][0]) * (y - polygon[i][1])
+        if (slope == 0):
+          return True
+        elif ((slope < 0) != (polygon[value][1] < polygon[i][1])):
           result = not result
-      x0, y0 = x1, y1
+      value = i
     return result
 
   def gl_fill_polygon(self, polygon):
@@ -165,10 +167,6 @@ class Renderer(object):
       for y in range(self.__height):
         if (self.__is_inside(x, y, polygon)):
           self.gl_vertex(x, y)
-
-  # Función que transforma un vértice con constantes de escala y traslación dadas.
-  def __transform_vertex(self, vertex, scale, translate):
-    return [(vertex[0] * scale[0]) + translate[0], (vertex[1] * scale[1]) + translate[1]]
 
   # Función que carga y dibuja un archivo .obj.
   def gl_load_obj(self, obj_file, scale_factor, translate_factor):
@@ -189,10 +187,10 @@ class Renderer(object):
         fourth_face = (face[3][0] - 1)
 
         # Vértices del cuadrado a dibujar.
-        first_vertex = self.__transform_vertex(object_file.vertices[first_face], scale_factor, translate_factor)
-        second_vertex = self.__transform_vertex(object_file.vertices[second_face], scale_factor, translate_factor)
-        third_vertex = self.__transform_vertex(object_file.vertices[third_face], scale_factor, translate_factor)
-        fourth_vertex = self.__transform_vertex(object_file.vertices[fourth_face], scale_factor, translate_factor)
+        first_vertex = utils.transform_vertex(object_file.vertices[first_face], scale_factor, translate_factor)
+        second_vertex = utils.transform_vertex(object_file.vertices[second_face], scale_factor, translate_factor)
+        third_vertex = utils.transform_vertex(object_file.vertices[third_face], scale_factor, translate_factor)
+        fourth_vertex = utils.transform_vertex(object_file.vertices[fourth_face], scale_factor, translate_factor)
 
         # Dibujo de las líneas necesarias para el cuadrado.
         self.gl_line(first_vertex[0], first_vertex[1], second_vertex[0], second_vertex[1])
@@ -209,9 +207,9 @@ class Renderer(object):
         third_face = (face[2][0] - 1)
 
         # Vértices del triángulo a dibujar.
-        first_vertex = self.__transform_vertex(object_file.vertices[first_face], scale_factor, translate_factor)
-        second_vertex = self.__transform_vertex(object_file.vertices[second_face], scale_factor, translate_factor)
-        third_vertex = self.__transform_vertex(object_file.vertices[third_face], scale_factor, translate_factor)
+        first_vertex = utils.transform_vertex(object_file.vertices[first_face], scale_factor, translate_factor)
+        second_vertex = utils.transform_vertex(object_file.vertices[second_face], scale_factor, translate_factor)
+        third_vertex = utils.transform_vertex(object_file.vertices[third_face], scale_factor, translate_factor)
 
         # Dibujo de las líneas necesarias para el triángulo.
         self.gl_line(first_vertex[0], first_vertex[1], second_vertex[0], second_vertex[1])
