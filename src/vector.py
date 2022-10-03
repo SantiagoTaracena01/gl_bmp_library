@@ -9,7 +9,7 @@ Santiago Taracena Puga (20017)
 class Vector(object):
 
   # Método constructor de la clase Vector.
-  def __init__(self, x, y, z):
+  def __init__(self, x, y, z=0):
     self.x = x
     self.y = y
     self.z = z
@@ -47,6 +47,12 @@ class Vector(object):
   # Método que retorna el vector normalizado.
   def norm(self):
     return (self * (1 / self.length()))
+
+  # Método que redondea las coordenadas del vector.
+  def round_coords(self):
+    self.x = round(self.x)
+    self.y = round(self.y)
+    self.z = round(self.z)
 
   # Representación textual del vector.
   def __repr__(self):

@@ -7,6 +7,7 @@ Santiago Taracena Puga (20017)
 
 # Módulos necesarios.
 from obj import Obj
+from vector import Vector
 import utils
 import random
 import math
@@ -241,7 +242,7 @@ class Renderer(object):
         third_vertex = utils.transform_vertex(object_file.vertices[third_face], scale_factor, translate_factor)
 
         # Dibujo de las líneas necesarias para el triángulo.
-        self.gl_draw_triangle(first_vertex, second_vertex, third_vertex)
+        self.gl_draw_triangle(Vector(*first_vertex), Vector(*second_vertex), Vector(*third_vertex))
 
   # Función que dibuja un triángulo dados tres puntos A, B y C.
   def gl_draw_triangle(self, A, B, C, color=None):
@@ -249,83 +250,48 @@ class Renderer(object):
     # Cambio de color del dibujo si se pasa un color como parámetro.
     self.gl_color(random.random(), random.random(), random.random())
 
-    # Redondeo de los valores de los puntos.
-    A = (round(A[0]), round(A[1]), round(A[2]))
-    B = (round(B[0]), round(B[1]), round(B[2]))
-    C = (round(C[0]), round(C[1]), round(C[2]))
-
-    # Cambio de A y B si A es mayor.
-    if (A[1] > B[1]):
-      A, B = B, A
-
-    # Cambio de A y C si A es mayor.
-    if (A[1] > C[1]):
-      A, C = C, A
-
-    # Cambio de B y C si B es mayor.
-    if (B[1] > C[1]):
-      B, C = C, B
-
-    # Diferenciales de x e y entre C y A.
-    dx_ac = (C[0] - A[0])
-    dy_ac = (C[1] - A[1])
-
-    # Si la pendiente entre C y A es cero, no hacemos nada.
-    if (dy_ac == 0):
-      return
-
-    # Pendiente inversa entre C y A.
-    im_ac = (dx_ac / dy_ac)
-
-    # Diferenciales de x e y entre B y A.
-    dx_ab = (B[0] - A[0])
-    dy_ab = (B[1] - A[1])
+    min_point, max_point = self.bounding_box(A, B, C)
+    min_point.round_coords()
+    max_point.round_coords()
     
-    # Diferenciales de x e y entre C y B.
-    dx_bc = (C[0] - B[0])
-    dy_bc = (C[1] - B[1])
+    for x in range(min_point.x, max_point.x + 1):
+      for y in range(min_point.y, max_point.y + 1):
+        w, v, u = self.barycentric_coords(A, B, C, Vector(x, y))
+        
+        if (w < 0 or v < 0 or u < 0):
+          continue
+        
+        self.gl_vertex(y, x)
 
-    # Si la pendiente entre B y A no es cero, dibujamos el primer triángulo.
-    if (dy_ab != 0):
+  def bounding_box(self, A, B, C):
+    
+    coords = [(A.x, A.y), (B.x, B.y), (C.x, C.y)]
 
-      # Pendiente inversa entre B y A.
-      im_ab = (dx_ab / dy_ab)
+    xmin = 999999
+    xmax = -999999
+    ymin = 999999
+    ymax = -999999
+    
+    for (x, y) in coords:
+      if x < xmin:
+        xmin = x
+      if x > xmax:
+        xmax = x
+      if y < ymin:
+        ymin = y
+      if y > ymax:
+        ymax = y
 
-      # Relleno del primer triángulo.
-      for y in range(A[1], (B[1] + 1)):
+    return Vector(xmin, ymin), Vector(xmax, ymax)
 
-        # Cálculo de x inicial y x final.
-        xi = round(A[0] - im_ac * (A[1] - y))
-        xf = round(A[0] - im_ab * (A[1] - y))
-
-        # Cambio de coordenadas si x inicial es mayor.
-        if (xi > xf):
-          xi, xf = xf, xi
-
-        # Relleno de cada línea horizontal del triángulo.
-        for x in range(xi, (xf + 1)):
-          self.gl_vertex(y, x)
-
-    # Si la pendiente entre C y B no es cero, dibujamos el segundo triángulo.
-    if (dy_bc != 0):
-
-      # Pendiente inversa entre C y B.
-      im_bc = (dx_bc / dy_bc)
-
-      # Relleno del segundo triángulo.
-      for y in range(B[1], (C[1] + 1)):
-
-        # Cálculo de x inicial y x final.
-        xi = round(A[0] - im_ac * (A[1] - y))
-        xf = round(B[0] - im_bc * (B[1] - y))
-
-        # Cambio de coordenadas si x inicial es mayor.
-        if (xi > xf):
-          xi, xf = xf, xi
-
-        # Relleno de cada línea horizontal del triángulo.
-        for x in range(xi, (xf + 1)):
-          self.gl_vertex(y, x)
+  def barycentric_coords(self, A, B, C, P):
+    
+    V = (Vector((B.x - A.x), (C.x - A.x), (A.x - P.x)) * Vector((B.y - A.y), (C.y - A.y), (A.y - P.y)))
+    u = V.x / V.z
+    v = V.y / V.z
+    w = 1 - u - v
+    
+    return (w, v, u)
 
   # Función para renderizar la imagen creada.
   def gl_finish(self, filename="./images/image.bmp"):
