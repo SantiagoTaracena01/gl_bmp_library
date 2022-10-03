@@ -13,7 +13,7 @@ color = lambda r, g, b: bytes([b, g, r])
 char = lambda character: struct.pack("=c", character.encode("ascii"))
 word = lambda word: struct.pack("=h", word)
 dword = lambda dword: struct.pack("=l", dword)
-transform_vertex = lambda vertex, scale, translate: [(vertex[0] * scale[0]) + translate[0], (vertex[1] * scale[1]) + translate[1]]
+transform_vertex = lambda vertex, scale, translate: ((vertex[0] * scale[0]) + translate[0], (vertex[1] * scale[1]) + translate[1], (vertex[2] * scale[2]) + translate[2])
 
 # Constantes extra utilizadas.
 BLACK = color(0, 0, 0)

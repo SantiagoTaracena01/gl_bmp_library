@@ -7,8 +7,9 @@ Santiago Taracena Puga (20017)
 
 # Módulos necesarios.
 from obj import Obj
-import math
 import utils
+import random
+import math
 
 # Definición de la clase Render.
 class Renderer(object):
@@ -240,21 +241,18 @@ class Renderer(object):
         third_vertex = utils.transform_vertex(object_file.vertices[third_face], scale_factor, translate_factor)
 
         # Dibujo de las líneas necesarias para el triángulo.
-        self.gl_line(first_vertex[0], first_vertex[1], second_vertex[0], second_vertex[1])
-        self.gl_line(second_vertex[0], second_vertex[1], third_vertex[0], third_vertex[1])
-        self.gl_line(third_vertex[0], third_vertex[1], first_vertex[0], first_vertex[1])
+        self.gl_draw_triangle(first_vertex, second_vertex, third_vertex)
 
   # Función que dibuja un triángulo dados tres puntos A, B y C.
   def gl_draw_triangle(self, A, B, C, color=None):
 
     # Cambio de color del dibujo si se pasa un color como parámetro.
-    if (color):
-      self.gl_color(*color)
+    self.gl_color(random.random(), random.random(), random.random())
 
-    # Dibujo de las tres líneas que componen el triángulo.
-    self.gl_point_line(A, B)
-    self.gl_point_line(B, C)
-    self.gl_point_line(C, A)
+    # Redondeo de los valores de los puntos.
+    A = (round(A[0]), round(A[1]), round(A[2]))
+    B = (round(B[0]), round(B[1]), round(B[2]))
+    C = (round(C[0]), round(C[1]), round(C[2]))
 
     # Cambio de A y B si A es mayor.
     if (A[1] > B[1]):
