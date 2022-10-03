@@ -32,6 +32,7 @@ class Renderer(object):
     self.__background_color = utils.BLACK
     self.__current_color = utils.WHITE
     self.__framebuffer = []
+    self.__z_buffer = [[-999999 for x in range(self.__width)] for y in range(self.__height)]
     self.gl_clear()
 
   # Función que limpia la ventana a un sólo color.
@@ -244,25 +245,6 @@ class Renderer(object):
         # Dibujo de las líneas necesarias para el triángulo.
         self.gl_draw_triangle(Vector(*first_vertex), Vector(*second_vertex), Vector(*third_vertex))
 
-  # Función que dibuja un triángulo dados tres puntos A, B y C.
-  def gl_draw_triangle(self, A, B, C, color=None):
-
-    # Cambio de color del dibujo si se pasa un color como parámetro.
-    self.gl_color(random.random(), random.random(), random.random())
-
-    min_point, max_point = self.bounding_box(A, B, C)
-    min_point.round_coords()
-    max_point.round_coords()
-    
-    for x in range(min_point.x, max_point.x + 1):
-      for y in range(min_point.y, max_point.y + 1):
-        w, v, u = self.barycentric_coords(A, B, C, Vector(x, y))
-        
-        if (w < 0 or v < 0 or u < 0):
-          continue
-        
-        self.gl_vertex(y, x)
-
   def bounding_box(self, A, B, C):
     
     coords = [(A.x, A.y), (B.x, B.y), (C.x, C.y)]
@@ -287,11 +269,41 @@ class Renderer(object):
   def barycentric_coords(self, A, B, C, P):
     
     V = (Vector((B.x - A.x), (C.x - A.x), (A.x - P.x)) * Vector((B.y - A.y), (C.y - A.y), (A.y - P.y)))
-    u = V.x / V.z
-    v = V.y / V.z
-    w = 1 - u - v
+    u = (V.x / V.z)
+    v = (V.y / V.z)
+    w = (1 - ((V.x + V.y) / V.z))
     
     return (w, v, u)
+
+  # Función que dibuja un triángulo dados tres puntos A, B y C.
+  def gl_draw_triangle(self, A, B, C):
+
+    light = Vector(0, 0, -1)
+    normal = ((C - A) * (B - A))
+    intensity = (light.norm() @ normal.norm())
+
+    if (intensity < 0):
+      return
+
+    # Cambio de color del dibujo si se pasa un color como parámetro.
+    self.gl_color(intensity, intensity, intensity)
+
+    min_point, max_point = self.bounding_box(A, B, C)
+    min_point.round_coords()
+    max_point.round_coords()
+    
+    for x in range(min_point.x, max_point.x + 1):
+      for y in range(min_point.y, max_point.y + 1):
+        w, v, u = self.barycentric_coords(A, B, C, Vector(x, y))
+        
+        if (w < 0 or v < 0 or u < 0):
+          continue
+        
+        z = ((A.z * w) + (B.z * v) + (C.z * u))
+        
+        if (self.__z_buffer[x][y] < z):
+          self.__z_buffer[x][y] = z
+          self.gl_vertex(y, x)
 
   # Función para renderizar la imagen creada.
   def gl_finish(self, filename="./images/image.bmp"):

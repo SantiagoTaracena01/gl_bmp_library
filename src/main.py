@@ -13,7 +13,7 @@ import time
 WIDTH = 1000
 HEIGHT = 1000
 
-SCALE = (400, 400, 10)
+SCALE = (400, 400, 400)
 TRANSLATE = (500, 500, 0)
 
 renderer = Renderer()
