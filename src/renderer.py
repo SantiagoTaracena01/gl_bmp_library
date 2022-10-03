@@ -139,12 +139,18 @@ class Renderer(object):
         y += 1 if (y0 < y1) else -1
         threshold += dx * 2
 
-  # Función que dibuja una linea con coordenadas relativas.
+  # Función que dibuja una línea con coordenadas relativas.
   def gl_relative_line(self, x0, y0, x1, y1):
     if ((-1 <= x0 <= 1) and (-1 <= y0 <= 1) and (-1 <= x1 <= 1) and (-1 <= y1 <= 1)):
       x0, y0 = self.__relative_to_absolute_conversion(x0, y0)
       x1, y1 = self.__relative_to_absolute_conversion(x1, y1)
       self.gl_line(x0, y0, x1, y1)
+
+  # Función que dibuja una línea dados dos puntos p y q.
+  def gl_point_line(self, p, q):
+    x0, y0 = p
+    x1, y1 = q
+    self.gl_line(x0, y0, x1, y1)
 
   # Función que calcula si un punto está dentro de un polígono.
   def __is_inside(self, x, y, polygon):
@@ -238,7 +244,14 @@ class Renderer(object):
         self.gl_line(second_vertex[0], second_vertex[1], third_vertex[0], third_vertex[1])
         self.gl_line(third_vertex[0], third_vertex[1], first_vertex[0], first_vertex[1])
 
-  # Método para renderizar la imagen creada.
+  # Función que dibuja un triángulo dados tres puntos A, B y C.
+  def gl_draw_triangle(self, A, B, C, color=None):
+    self.__current_color = color or self.__current_color
+    self.gl_point_line(A, B)
+    self.gl_point_line(B, C)
+    self.gl_point_line(C, A)
+
+  # Función para renderizar la imagen creada.
   def gl_finish(self, filename="./images/image.bmp"):
 
     # Formateo del nombre del archivo para estar en la carpeta de imágenes.
