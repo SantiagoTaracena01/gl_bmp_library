@@ -27,18 +27,18 @@ class Renderer(object):
     self.__viewport_height = 0
     self.__viewport_x_coordinate = 0
     self.__viewport_y_coordinate = 0
-    self.__clear_color = utils.BLACK
+    self.__background_color = utils.BLACK
     self.__current_color = utils.WHITE
     self.__framebuffer = []
     self.gl_clear()
 
   # Función que limpia la ventana a un sólo color.
   def gl_clear(self):
-    self.__framebuffer = [[(self.__clear_color) for x in range(self.__width)] for y in range(self.__height)]
+    self.__framebuffer = [[(self.__background_color) for x in range(self.__width)] for y in range(self.__height)]
 
   # Función que cambia el color de gl_clear().
   def gl_clear_color(self, r, g, b):
-    self.__clear_color = utils.color(
+    self.__background_color = utils.color(
       math.ceil(r * 255),
       math.ceil(g * 255),
       math.ceil(b * 255),
@@ -66,7 +66,7 @@ class Renderer(object):
     self.__viewport_height = height
     for w in range(self.__viewport_width):
       for h in range(self.__viewport_height):
-        self.__framebuffer[self.__viewport_y_coordinate + h][self.__viewport_x_coordinate + w] = self.__current_color
+        self.__framebuffer[self.__viewport_y_coordinate + h][self.__viewport_x_coordinate + w] = self.__background_color
 
   # Función que convierte coordenadas absolutas a relativas.
   def __relative_to_absolute_conversion(self, x, y) -> tuple[int, int]:
@@ -246,10 +246,88 @@ class Renderer(object):
 
   # Función que dibuja un triángulo dados tres puntos A, B y C.
   def gl_draw_triangle(self, A, B, C, color=None):
-    self.__current_color = color or self.__current_color
+
+    # Cambio de color del dibujo si se pasa un color como parámetro.
+    if (color):
+      self.gl_color(*color)
+
+    # Dibujo de las tres líneas que componen el triángulo.
     self.gl_point_line(A, B)
     self.gl_point_line(B, C)
     self.gl_point_line(C, A)
+
+    # Cambio de A y B si A es mayor.
+    if (A[1] > B[1]):
+      A, B = B, A
+
+    # Cambio de A y C si A es mayor.
+    if (A[1] > C[1]):
+      A, C = C, A
+
+    # Cambio de B y C si B es mayor.
+    if (B[1] > C[1]):
+      B, C = C, B
+
+    # Diferenciales de x e y entre C y A.
+    dx_ac = (C[0] - A[0])
+    dy_ac = (C[1] - A[1])
+
+    # Si la pendiente entre C y A es cero, no hacemos nada.
+    if (dy_ac == 0):
+      return
+
+    # Pendiente inversa entre C y A.
+    im_ac = (dx_ac / dy_ac)
+
+    # Diferenciales de x e y entre B y A.
+    dx_ab = (B[0] - A[0])
+    dy_ab = (B[1] - A[1])
+    
+    # Diferenciales de x e y entre C y B.
+    dx_bc = (C[0] - B[0])
+    dy_bc = (C[1] - B[1])
+
+    # Si la pendiente entre B y A no es cero, dibujamos el primer triángulo.
+    if (dy_ab != 0):
+
+      # Pendiente inversa entre B y A.
+      im_ab = (dx_ab / dy_ab)
+
+      # Relleno del primer triángulo.
+      for y in range(A[1], (B[1] + 1)):
+
+        # Cálculo de x inicial y x final.
+        xi = round(A[0] - im_ac * (A[1] - y))
+        xf = round(A[0] - im_ab * (A[1] - y))
+
+        # Cambio de coordenadas si x inicial es mayor.
+        if (xi > xf):
+          xi, xf = xf, xi
+
+        # Relleno de cada línea horizontal del triángulo.
+        for x in range(xi, (xf + 1)):
+          self.gl_vertex(y, x)
+
+    # Si la pendiente entre C y B no es cero, dibujamos el segundo triángulo.
+    if (dy_bc != 0):
+
+      # Pendiente inversa entre C y B.
+      im_bc = (dx_bc / dy_bc)
+
+      # Relleno del segundo triángulo.
+      for y in range(B[1], (C[1] + 1)):
+
+        # Cálculo de x inicial y x final.
+        xi = round(A[0] - im_ac * (A[1] - y))
+        xf = round(B[0] - im_bc * (B[1] - y))
+
+        # Cambio de coordenadas si x inicial es mayor.
+        if (xi > xf):
+          xi, xf = xf, xi
+
+        # Relleno de cada línea horizontal del triángulo.
+        for x in range(xi, (xf + 1)):
+          self.gl_vertex(y, x)
 
   # Función para renderizar la imagen creada.
   def gl_finish(self, filename="./images/image.bmp"):
