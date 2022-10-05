@@ -9,20 +9,23 @@ Santiago Taracena Puga (20017)
 from renderer import Renderer
 import time
 
-# Ancho y alto de la imagen creada.
-WIDTH = 1000
-HEIGHT = 1000
+# Código principal del programa.
+if __name__ == "__main__":
 
-SCALE = (400, 400, 400)
-TRANSLATE = (500, 500, 0)
+  # Ancho y alto de la imagen creada.
+  WIDTH = 1000
+  HEIGHT = 1000
 
-renderer = Renderer()
-renderer.gl_create_window(WIDTH, HEIGHT)
-renderer.gl_viewport(0, 0, WIDTH, HEIGHT)
+  SCALE = (35, 35, 35)
+  TRANSLATE = (500, 550, 0)
 
-start = time.time()
+  renderer = Renderer()
+  renderer.gl_create_window(WIDTH, HEIGHT)
+  renderer.gl_viewport(0, 0, WIDTH, HEIGHT)
 
-renderer.gl_load_obj("./models/model.obj", SCALE, TRANSLATE)
+  start = time.time()
 
-filename = renderer.gl_finish()
-print(f"\nRendering process has been finished in {round((time.time() - start), 4)} seconds! Check {filename}!\n")
+  renderer.gl_load_obj("./models/hylian_shield.obj", SCALE, TRANSLATE)
+
+  filename = renderer.gl_finish()
+  print(f"\nRendering process has been finished in {round((time.time() - start), 4)} seconds! Check {filename}!\n")

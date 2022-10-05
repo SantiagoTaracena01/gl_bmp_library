@@ -224,10 +224,8 @@ class Renderer(object):
         fourth_vertex = utils.transform_vertex(object_file.vertices[fourth_face], scale_factor, translate_factor)
 
         # Dibujo de las líneas necesarias para el cuadrado.
-        self.gl_line(first_vertex[0], first_vertex[1], second_vertex[0], second_vertex[1])
-        self.gl_line(second_vertex[0], second_vertex[1], third_vertex[0], third_vertex[1])
-        self.gl_line(third_vertex[0], third_vertex[1], fourth_vertex[0], fourth_vertex[1])
-        self.gl_line(fourth_vertex[0], fourth_vertex[1], first_vertex[0], first_vertex[1])
+        self.gl_draw_triangle(Vector(*first_vertex), Vector(*second_vertex), Vector(*third_vertex), (0, 0.75, 1))
+        self.gl_draw_triangle(Vector(*first_vertex), Vector(*third_vertex), Vector(*fourth_vertex), (0, 0.75, 1))
 
       # Dibujo de un triángulo.
       elif (len(face) == 3):
@@ -243,9 +241,9 @@ class Renderer(object):
         third_vertex = utils.transform_vertex(object_file.vertices[third_face], scale_factor, translate_factor)
 
         # Dibujo de las líneas necesarias para el triángulo.
-        self.gl_draw_triangle(Vector(*first_vertex), Vector(*second_vertex), Vector(*third_vertex))
+        self.gl_draw_triangle(Vector(*first_vertex), Vector(*second_vertex), Vector(*third_vertex), (0, 0.75, 1))
 
-  def bounding_box(self, A, B, C):
+  def __bounding_box(self, A, B, C):
     
     coords = [(A.x, A.y), (B.x, B.y), (C.x, C.y)]
 
@@ -266,35 +264,44 @@ class Renderer(object):
 
     return Vector(xmin, ymin), Vector(xmax, ymax)
 
-  def barycentric_coords(self, A, B, C, P):
-    
+  def __barycentric_coords(self, A, B, C, P):
+
     V = (Vector((B.x - A.x), (C.x - A.x), (A.x - P.x)) * Vector((B.y - A.y), (C.y - A.y), (A.y - P.y)))
-    u = (V.x / V.z)
-    v = (V.y / V.z)
-    w = (1 - ((V.x + V.y) / V.z))
+
+    try:
+      u = (V.x / V.z)
+      v = (V.y / V.z)
+      w = (1 - ((V.x + V.y) / V.z))
+    except:
+      u, v, w = -1, -1, -1
     
     return (w, v, u)
 
   # Función que dibuja un triángulo dados tres puntos A, B y C.
-  def gl_draw_triangle(self, A, B, C):
+  def gl_draw_triangle(self, A, B, C, color=None):
 
-    light = Vector(0, 0, -1)
+    light = Vector(2, 2, -1)
     normal = ((C - A) * (B - A))
     intensity = (light.norm() @ normal.norm())
 
     if (intensity < 0):
       return
 
-    # Cambio de color del dibujo si se pasa un color como parámetro.
-    self.gl_color(intensity, intensity, intensity)
+    # Cambio de color para colorear un modelo.
+    if (color is not None):
+      self.gl_color(color[0] * intensity, color[1] * intensity, color[2] * intensity)
 
-    min_point, max_point = self.bounding_box(A, B, C)
+    # Coloración en blanco y negro del modelo.
+    else:
+      self.gl_color(intensity, intensity, intensity)
+
+    min_point, max_point = self.__bounding_box(A, B, C)
     min_point.round_coords()
     max_point.round_coords()
     
     for x in range(min_point.x, max_point.x + 1):
       for y in range(min_point.y, max_point.y + 1):
-        w, v, u = self.barycentric_coords(A, B, C, Vector(x, y))
+        w, v, u = self.__barycentric_coords(A, B, C, Vector(x, y))
         
         if (w < 0 or v < 0 or u < 0):
           continue
