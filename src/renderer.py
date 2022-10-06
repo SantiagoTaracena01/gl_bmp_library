@@ -223,7 +223,7 @@ class Renderer(object):
         third_vertex = utils.transform_vertex(object_file.vertices[third_face], scale_factor, translate_factor)
         fourth_vertex = utils.transform_vertex(object_file.vertices[fourth_face], scale_factor, translate_factor)
 
-        # Dibujo de las líneas necesarias para el cuadrado.
+        # Dibujo de los polígonos necesarios para pintar el modelo.
         self.gl_draw_triangle(Vector(*first_vertex), Vector(*second_vertex), Vector(*third_vertex), (0, 0.75, 1))
         self.gl_draw_triangle(Vector(*first_vertex), Vector(*third_vertex), Vector(*fourth_vertex), (0, 0.75, 1))
 
@@ -240,50 +240,61 @@ class Renderer(object):
         second_vertex = utils.transform_vertex(object_file.vertices[second_face], scale_factor, translate_factor)
         third_vertex = utils.transform_vertex(object_file.vertices[third_face], scale_factor, translate_factor)
 
-        # Dibujo de las líneas necesarias para el triángulo.
+        # Dibujo de los polígonos necesarios para el triángulo.
         self.gl_draw_triangle(Vector(*first_vertex), Vector(*second_vertex), Vector(*third_vertex), (0, 0.75, 1))
 
+  # Función que halla los límites de un triángulo a pintar.
   def __bounding_box(self, A, B, C):
-    
+
+    # Coordenadas de los vértices del triángulo.
     coords = [(A.x, A.y), (B.x, B.y), (C.x, C.y)]
 
-    xmin = 999999
-    xmax = -999999
-    ymin = 999999
-    ymax = -999999
-    
+    # Valores mínimos y máximos exagerados.
+    xmin = 9999
+    xmax = -9999
+    ymin = 9999
+    ymax = -9999
+
+    # Cálculo de los nuevos máximos y mínimos.
     for (x, y) in coords:
-      if x < xmin:
+      if (x < xmin):
         xmin = x
-      if x > xmax:
+      if (x > xmax):
         xmax = x
-      if y < ymin:
+      if (y < ymin):
         ymin = y
-      if y > ymax:
+      if (y > ymax):
         ymax = y
 
+    # Retorno de los vectores mínimos y máximos del triángulo.
     return Vector(xmin, ymin), Vector(xmax, ymax)
 
+  # Función que calcula coordenadas baricéntricas.
   def __barycentric_coords(self, A, B, C, P):
 
+    # Vector creado para el cálculo de las coordenadas.
     V = (Vector((B.x - A.x), (C.x - A.x), (A.x - P.x)) * Vector((B.y - A.y), (C.y - A.y), (A.y - P.y)))
 
+    # Cálculo de los valores u, v y w resultantes.
     try:
       u = (V.x / V.z)
       v = (V.y / V.z)
       w = (1 - ((V.x + V.y) / V.z))
     except:
       u, v, w = -1, -1, -1
-    
+
+    # Retorno de los valores w, v y u.
     return (w, v, u)
 
   # Función que dibuja un triángulo dados tres puntos A, B y C.
   def gl_draw_triangle(self, A, B, C, color=None):
 
+    # Luz, vector normal e intensidad del triángulo.
     light = Vector(0, 0, -1)
     normal = ((C - A) * (B - A))
     intensity = (light.norm() @ normal.norm())
 
+    # Si la intensidad es menor a cero, no dibujamos nada.
     if (intensity < 0):
       return
 
@@ -295,19 +306,26 @@ class Renderer(object):
     else:
       self.gl_color(intensity, intensity, intensity)
 
+    # Puntos mínimos y máximos sobre los cuáles dibujar.
     min_point, max_point = self.__bounding_box(A, B, C)
     min_point.round_coords()
     max_point.round_coords()
-    
-    for x in range(min_point.x, max_point.x + 1):
-      for y in range(min_point.y, max_point.y + 1):
+
+    # Iteración sobre el triángulo a pintar.
+    for x in range(min_point.x, (max_point.x + 1)):
+      for y in range(min_point.y, (max_point.y + 1)):
+
+        # Coordenadas a pintar.
         w, v, u = self.__barycentric_coords(A, B, C, Vector(x, y))
-        
+
+        # Casos en los que el punto no se encuentra en el triángulo.
         if (w < 0 or v < 0 or u < 0):
           continue
-        
+
+        # Cálculo de la coordenada z del triángulo a pintar.
         z = ((A.z * w) + (B.z * v) + (C.z * u))
-        
+
+        # Si el valor a pintar está frente al último valor del z-buffer, lo pintamos.
         if (self.__z_buffer[x][y] < z):
           self.__z_buffer[x][y] = z
           self.gl_vertex(y, x)
