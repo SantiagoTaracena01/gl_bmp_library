@@ -16,7 +16,7 @@ if __name__ == "__main__":
   WIDTH = 1000
   HEIGHT = 1000
 
-  SCALE = (35, 35, 35)
+  SCALE = (0.75, 0.75, 0.75)
   TRANSLATE = (500, 550, 0)
 
   renderer = Renderer()
@@ -25,7 +25,7 @@ if __name__ == "__main__":
 
   start = time.time()
 
-  renderer.gl_load_obj("./models/hylian_shield.obj", SCALE, TRANSLATE)
+  renderer.gl_load_obj("./models/yoshi.obj", SCALE, TRANSLATE)
 
-  filename = renderer.gl_finish()
+  filename = renderer.gl_finish("./images/yoshi.bmp")
   print(f"\nRendering process has been finished in {round((time.time() - start), 4)} seconds! Check {filename}!\n")

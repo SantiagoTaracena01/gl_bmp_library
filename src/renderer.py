@@ -280,7 +280,7 @@ class Renderer(object):
   # Función que dibuja un triángulo dados tres puntos A, B y C.
   def gl_draw_triangle(self, A, B, C, color=None):
 
-    light = Vector(2, 2, -1)
+    light = Vector(0, 0, -1)
     normal = ((C - A) * (B - A))
     intensity = (light.norm() @ normal.norm())
 
