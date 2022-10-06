@@ -71,6 +71,10 @@ class Renderer(object):
       for h in range(self.__viewport_height):
         self.__framebuffer[self.__viewport_y_coordinate + h][self.__viewport_x_coordinate + w] = self.__background_color
 
+  # Función que permite intercambiar o crear un framebuffer personalizado.
+  def gl_reset_framebuffer(self, new_framebuffer=[]):
+    self.__framebuffer = new_framebuffer
+
   # Función que convierte coordenadas absolutas a relativas.
   def __relative_to_absolute_conversion(self, x, y) -> tuple[int, int]:
     cx, cy = (self.__viewport_width // 2), (self.__viewport_height // 2)
@@ -150,9 +154,9 @@ class Renderer(object):
       self.gl_line(x0, y0, x1, y1)
 
   # Función que dibuja una línea dados dos puntos p y q.
-  def gl_point_line(self, p, q):
-    x0, y0 = p
-    x1, y1 = q
+  def gl_vector_line(self, P, Q):
+    x0, y0 = P.x, P.y
+    x1, y1 = Q.x, Q.y
     self.gl_line(x0, y0, x1, y1)
 
   # Función que calcula si un punto está dentro de un polígono.
@@ -200,7 +204,11 @@ class Renderer(object):
           self.gl_vertex(x, y)
 
   # Función que carga y dibuja un archivo .obj.
-  def gl_load_obj(self, obj_file, scale_factor, translate_factor):
+  def gl_load_obj(self, obj_file, scale_factor, translate_factor, color=None):
+
+    # Nueva definición del color del modelo.
+    if (color is None):
+      color = (1, 1, 1)
 
     # Carga y lectura del archivo .obj.
     object_file = Obj(obj_file)
@@ -224,8 +232,8 @@ class Renderer(object):
         fourth_vertex = utils.transform_vertex(object_file.vertices[fourth_face], scale_factor, translate_factor)
 
         # Dibujo de los polígonos necesarios para pintar el modelo.
-        self.gl_draw_triangle(Vector(*first_vertex), Vector(*second_vertex), Vector(*third_vertex), (0, 0.75, 1))
-        self.gl_draw_triangle(Vector(*first_vertex), Vector(*third_vertex), Vector(*fourth_vertex), (0, 0.75, 1))
+        self.gl_draw_triangle(Vector(*first_vertex), Vector(*second_vertex), Vector(*third_vertex), color)
+        self.gl_draw_triangle(Vector(*first_vertex), Vector(*third_vertex), Vector(*fourth_vertex), color)
 
       # Dibujo de un triángulo.
       elif (len(face) == 3):
@@ -240,8 +248,31 @@ class Renderer(object):
         second_vertex = utils.transform_vertex(object_file.vertices[second_face], scale_factor, translate_factor)
         third_vertex = utils.transform_vertex(object_file.vertices[third_face], scale_factor, translate_factor)
 
-        # Dibujo de los polígonos necesarios para el triángulo.
-        self.gl_draw_triangle(Vector(*first_vertex), Vector(*second_vertex), Vector(*third_vertex), (0, 0.75, 1))
+        if (self.texture):
+
+          # Cálculo de las caras del triángulo.
+          first_texture_face = (face[0][1] - 1)
+          second_texture_face = (face[1][1] - 1)
+          third_texture_face = (face[2][1] - 1)
+
+          # Vértices del triángulo a dibujar.
+          first_texture_vertex = Vector(
+            object_file.vertices[first_texture_face][0] * self.texture.width,
+            object_file.vertices[first_texture_face][1] * self.texture.height
+          )
+          second_texture_vertex = Vector(
+            object_file.vertices[second_texture_face][0] * self.texture.width,
+            object_file.vertices[second_texture_face][1] * self.texture.height
+          )
+          third_texture_vertex = Vector(
+            object_file.vertices[third_texture_face][0] * self.texture.width,
+            object_file.vertices[third_texture_face][1] * self.texture.height
+          )
+
+        else:
+
+          # Dibujo de los polígonos necesarios para el triángulo.
+          self.gl_draw_triangle(Vector(*first_vertex), Vector(*second_vertex), Vector(*third_vertex), color)
 
   # Función que halla los límites de un triángulo a pintar.
   def __bounding_box(self, A, B, C):
@@ -361,8 +392,8 @@ class Renderer(object):
     file.write(utils.dword(0))
 
     # Escritura de cada pixel del archivo mediante los valores del framebuffer.
-    for x in range(self.__width):
-      for y in range(self.__height):
+    for y in range(self.__height):
+      for x in range(self.__width):
         file.write(self.__framebuffer[y][x])
 
     # Cierre del archivo.

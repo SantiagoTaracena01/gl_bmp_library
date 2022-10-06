@@ -17,8 +17,8 @@ if __name__ == "__main__":
   HEIGHT = 1000
 
   # Valores de escala y traslación del modelo.
-  SCALE = (0.75, 0.75, 0.75)
-  TRANSLATE = (500, 550, 0)
+  SCALE = (1000, 1000, 1000)
+  TRANSLATE = (500, 100, 0)
 
   # Instancia y creación de valores básicos del renderer.
   renderer = Renderer()
@@ -29,8 +29,8 @@ if __name__ == "__main__":
   start = time.time()
 
   # Proceso de renderización.
-  renderer.gl_load_obj("./models/yoshi.obj", SCALE, TRANSLATE)
-  filename = renderer.gl_finish("./images/yoshi.bmp")
+  renderer.gl_load_obj("./models/natsuki.obj", SCALE, TRANSLATE, (1, 0.6, 0.85))
+  filename = renderer.gl_finish()
 
   # Impresión de resultados finales.
   print(f"\nRendering process has been finished in {round((time.time() - start), 4)} seconds! Check {filename}!\n")

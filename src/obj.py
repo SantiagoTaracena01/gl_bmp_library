@@ -18,6 +18,7 @@ class Obj(object):
     # Definición de las caras y los vértices del archivo.
     self.faces = []
     self.vertices = []
+    self.texture_vertices = []
     self.__read_obj_lines()
 
   # Método que obtiene las caras y los vértices del archivo .obj.
@@ -41,3 +42,7 @@ class Obj(object):
       # Obtención de los vértices del archivo.
       elif (prefix == "v"):
         self.vertices.append(list(map(float, value.split(" "))))
+
+      # Obtención de los vértices de texturas del archivo.
+      elif (prefix == "vt"):
+        self.texture_vertices.append(list(map(float, value.split(" "))))
