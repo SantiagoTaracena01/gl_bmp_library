@@ -52,5 +52,23 @@ def write_bmp(filename, framebuffer, width, height, constants):
   # Retorno del nombre del archivo para futuras operaciones.
   return actual_filename
 
-def read_bmp():
-  pass
+# Función que lee un archivo .bmp.
+def read_bmp(path):
+  with open(path, "rb") as image:
+    image.seek(2 + 4 + 2 + 2)
+    header_size = utils.unpack(image.read(4))
+    image.seek(2 + 4 + 2 + 2 + 4 + 4)
+    width = utils.unpack(image.read(4))
+    height = utils.unpack(image.read(4))
+    image.seek(header_size)
+    pixels = []
+    for y in range(height):
+      pixels.append([])
+      for x in range(width):
+        b = ord(image.read(1))
+        g = ord(image.read(1))
+        r = ord(image.read(1))
+        pixels[y].append(
+          utils.color(r, g, b)
+        )
+  return width, height, pixels
