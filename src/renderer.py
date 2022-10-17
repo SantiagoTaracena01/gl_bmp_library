@@ -33,6 +33,7 @@ class Renderer(object):
     self.__current_color = utils.WHITE
     self.__framebuffer = []
     self.__z_buffer = [[-999999 for x in range(self.__width)] for y in range(self.__height)]
+    self.__texture = None
     self.gl_clear()
 
   # Función que limpia la ventana a un sólo color.
@@ -76,7 +77,7 @@ class Renderer(object):
     self.__framebuffer = new_framebuffer
 
   # Función que convierte coordenadas absolutas a relativas.
-  def __relative_to_absolute_conversion(self, x, y) -> tuple[int, int]:
+  def __relative_to_absolute_conversion(self, x, y):
     cx, cy = (self.__viewport_width // 2), (self.__viewport_height // 2)
     px, py = (round((x + 1) * cx) + self.__viewport_x_coordinate), (round((y + 1) * cy) + self.__viewport_y_coordinate)
     return (px, py)
@@ -232,8 +233,33 @@ class Renderer(object):
         fourth_vertex = utils.transform_vertex(object_file.vertices[fourth_face], scale_factor, translate_factor)
 
         # Dibujo de los polígonos necesarios para pintar el modelo.
-        self.gl_draw_triangle(Vector(*first_vertex), Vector(*second_vertex), Vector(*third_vertex), color)
-        self.gl_draw_triangle(Vector(*first_vertex), Vector(*third_vertex), Vector(*fourth_vertex), color)
+        self.gl_draw_triangle((Vector(*first_vertex), Vector(*second_vertex), Vector(*third_vertex)), color=color)
+        self.gl_draw_triangle((Vector(*first_vertex), Vector(*third_vertex), Vector(*fourth_vertex)), color=color)
+
+        if (self.__texture):
+          
+          # Cálculo de las caras del triángulo.
+          first_texture_face = (face[0][1] - 1)
+          second_texture_face = (face[1][1] - 1)
+          third_texture_face = (face[2][1] - 1)
+          fourth_texture_face = (face[3][1] - 1)
+          
+          first_texture_vertex = Vector(*object_file.texture_vertices[first_texture_face])
+          second_texture_vertex = Vector(*object_file.texture_vertices[second_texture_face])
+          third_texture_vertex = Vector(*object_file.texture_vertices[third_texture_face])
+          fourth_texture_vertex = Vector(*object_file.texture_vertices[fourth_texture_face])
+
+          self.gl_draw_triangle(
+            (Vector(*first_vertex), Vector(*second_vertex), Vector(*third_vertex)),
+            (first_texture_vertex, second_texture_vertex, third_texture_vertex),
+            color=None
+          )
+
+          self.gl_draw_triangle(
+            (Vector(*first_vertex), Vector(*fourth_vertex), Vector(*third_vertex)),
+            (first_texture_vertex, fourth_texture_vertex, third_texture_vertex),
+            color=None
+          )
 
       # Dibujo de un triángulo.
       elif (len(face) == 3):
@@ -248,7 +274,7 @@ class Renderer(object):
         second_vertex = utils.transform_vertex(object_file.vertices[second_face], scale_factor, translate_factor)
         third_vertex = utils.transform_vertex(object_file.vertices[third_face], scale_factor, translate_factor)
 
-        if (self.texture):
+        if (self.__texture):
 
           # Cálculo de las caras del triángulo.
           first_texture_face = (face[0][1] - 1)
@@ -256,23 +282,20 @@ class Renderer(object):
           third_texture_face = (face[2][1] - 1)
 
           # Vértices del triángulo a dibujar.
-          first_texture_vertex = Vector(
-            object_file.vertices[first_texture_face][0] * self.texture.width,
-            object_file.vertices[first_texture_face][1] * self.texture.height
-          )
-          second_texture_vertex = Vector(
-            object_file.vertices[second_texture_face][0] * self.texture.width,
-            object_file.vertices[second_texture_face][1] * self.texture.height
-          )
-          third_texture_vertex = Vector(
-            object_file.vertices[third_texture_face][0] * self.texture.width,
-            object_file.vertices[third_texture_face][1] * self.texture.height
+          first_texture_vertex = Vector(*object_file.texture_vertices[first_texture_face])
+          second_texture_vertex = Vector(*object_file.texture_vertices[second_texture_face])
+          third_texture_vertex = Vector(*object_file.texture_vertices[third_texture_face])
+          
+          self.gl_draw_triangle(
+            (Vector(*first_vertex), Vector(*second_vertex), Vector(*third_vertex)),
+            (first_texture_vertex, second_texture_vertex, third_texture_vertex),
+            color=None
           )
 
         else:
 
           # Dibujo de los polígonos necesarios para el triángulo.
-          self.gl_draw_triangle(Vector(*first_vertex), Vector(*second_vertex), Vector(*third_vertex), color)
+          self.gl_draw_triangle((Vector(*first_vertex), Vector(*second_vertex), Vector(*third_vertex)), color=color)
 
   # Función que halla los límites de un triángulo a pintar.
   def __bounding_box(self, A, B, C):
@@ -318,7 +341,13 @@ class Renderer(object):
     return (w, v, u)
 
   # Función que dibuja un triángulo dados tres puntos A, B y C.
-  def gl_draw_triangle(self, A, B, C, color=None):
+  def gl_draw_triangle(self, points, texture_points=(Vector(0, 0, 0), Vector(0, 0, 0), Vector(0, 0, 0)), color=None):
+
+    # Puntos y texturas a dibujar con el triángulo.
+    A, B, C = points[0], points[1], points[2]
+
+    if (self.__texture):
+      tA, tB, tC = texture_points[0], texture_points[1], texture_points[2]
 
     # Luz, vector normal e intensidad del triángulo.
     light = Vector(0, 0, -1)
@@ -358,8 +387,20 @@ class Renderer(object):
 
         # Si el valor a pintar está frente al último valor del z-buffer, lo pintamos.
         if (self.__z_buffer[x][y] < z):
+
           self.__z_buffer[x][y] = z
-          self.gl_vertex(y, x)
+
+          if (self.__texture):
+            tx = tA.x * w + tB.x * u + tC.x * v
+            ty = tA.y * w + tB.y * u + tC.y * v
+          
+            self.__current_color = self.__texture.get_color_with_intensity(tx, ty, intensity)
+
+          self.gl_vertex(x, y)
+
+  # Función que carga una textura para el modelo.
+  def gl_load_texture(self, texture):
+    self.__texture = texture
 
   # Función para renderizar la imagen creada.
   def gl_finish(self, filename="./images/image.bmp"):

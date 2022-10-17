@@ -7,6 +7,7 @@ Santiago Taracena Puga (20017)
 
 # Módulos/librerías importadas para el desarrollo de main.py.
 from renderer import Renderer
+from texture import Texture
 import time
 
 # Código principal del programa.
@@ -17,8 +18,8 @@ if __name__ == "__main__":
   HEIGHT = 1000
 
   # Valores de escala y traslación del modelo.
-  SCALE = (1000, 1000, 1000)
-  TRANSLATE = (500, 100, 0)
+  SCALE = (400, 400, 400)
+  TRANSLATE = (500, 500, 0)
 
   # Instancia y creación de valores básicos del renderer.
   renderer = Renderer()
@@ -29,7 +30,9 @@ if __name__ == "__main__":
   start = time.time()
 
   # Proceso de renderización.
-  renderer.gl_load_obj("./models/natsuki.obj", SCALE, TRANSLATE, (1, 0.6, 0.85))
+  model_texture = Texture("./textures/model_txs.bmp")
+  renderer.gl_load_texture(model_texture)
+  renderer.gl_load_obj("./models/model.obj", SCALE, TRANSLATE, (1, 0.6, 0.85))
   filename = renderer.gl_finish()
 
   # Impresión de resultados finales.
