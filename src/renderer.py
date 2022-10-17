@@ -9,7 +9,7 @@ Santiago Taracena Puga (20017)
 from obj import Obj
 from vector import Vector
 import utils
-import random
+import bmp
 import math
 
 # Definición de la clase Render.
@@ -403,42 +403,8 @@ class Renderer(object):
     self.__texture = texture
 
   # Función para renderizar la imagen creada.
-  def gl_finish(self, filename="./images/image.bmp"):
-
-    # Formateo del nombre del archivo para estar en la carpeta de imágenes.
-    bmp_filename = filename if filename.endswith(".bmp") else f"{filename}.bmp"
-    actual_filename = bmp_filename if bmp_filename.startswith("./images/") else f"./images/{bmp_filename}"
-
-    # Apertura del archivo.
-    file = open(actual_filename, "bw")
-
-    # Escritura preliminar del header del archivo.
-    file.write(utils.char("B"))
-    file.write(utils.char("M"))
-    file.write(utils.dword(self.__HEADER_SIZE + (self.__width * self.__height * self.__COLORS_PER_PIXEL)))
-    file.write(utils.dword(0))
-    file.write(utils.dword(self.__HEADER_SIZE))
-
-    # Finalización de la escritura del header del archivo.
-    file.write(utils.dword(self.__IMAGE_HEADER_SIZE))
-    file.write(utils.dword(self.__width))
-    file.write(utils.dword(self.__height))
-    file.write(utils.word(1))
-    file.write(utils.word(24))
-    file.write(utils.dword(0))
-    file.write(utils.dword(self.__width * self.__height * self.__COLORS_PER_PIXEL))
-    file.write(utils.dword(0))
-    file.write(utils.dword(0))
-    file.write(utils.dword(0))
-    file.write(utils.dword(0))
-
-    # Escritura de cada pixel del archivo mediante los valores del framebuffer.
-    for y in range(self.__height):
-      for x in range(self.__width):
-        file.write(self.__framebuffer[y][x])
-
-    # Cierre del archivo.
-    file.close()
-
-    # Retorno del nombre del archivo para futuras operaciones.
-    return actual_filename
+  def gl_finish(self, filename="./images/image.bmp"):    
+    return bmp.write_bmp(
+      filename, self.__framebuffer, self.__width, self.__height,
+      (self.__HEADER_SIZE, self.__IMAGE_HEADER_SIZE, self.__COLORS_PER_PIXEL)
+    )
