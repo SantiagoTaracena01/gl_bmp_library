@@ -18,7 +18,7 @@ if __name__ == "__main__":
   HEIGHT = 1000
 
   # Valores de escala y traslación del modelo.
-  SCALE = (400, 400, 400)
+  SCALE = (2400, 2400, 2400)
   TRANSLATE = (500, 500, 0)
 
   # Instancia y creación de valores básicos del renderer.
@@ -30,9 +30,9 @@ if __name__ == "__main__":
   start = time.time()
 
   # Proceso de renderización.
-  model_texture = Texture("./textures/model_txs.bmp")
+  model_texture = Texture("./textures/mask_txs.bmp")
   renderer.gl_load_texture(model_texture)
-  renderer.gl_load_obj("./models/model.obj", SCALE, TRANSLATE, (1, 0.6, 0.85))
+  renderer.gl_load_obj("./models/mask.obj", SCALE, TRANSLATE, (1, 0.6, 0.85))
   filename = renderer.gl_finish()
 
   # Impresión de resultados finales.

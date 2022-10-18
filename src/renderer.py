@@ -350,7 +350,7 @@ class Renderer(object):
       tA, tB, tC = texture_points[0], texture_points[1], texture_points[2]
 
     # Luz, vector normal e intensidad del triángulo.
-    light = Vector(0, 0, -1)
+    light = Vector(0, 5, -10)
     normal = ((C - A) * (B - A))
     intensity = (light.norm() @ normal.norm())
 
