@@ -8,6 +8,7 @@ Santiago Taracena Puga (20017)
 # Módulos necesarios.
 from obj import Obj
 from vector import Vector
+from matrix import Matrix
 import utils
 import bmp
 import math
@@ -34,6 +35,7 @@ class Renderer(object):
     self.__framebuffer = []
     self.__z_buffer = [[-999999 for x in range(self.__width)] for y in range(self.__height)]
     self.__texture = None
+    self.__model_matrix = None
     self.gl_clear()
 
   # Función que limpia la ventana a un sólo color.
@@ -204,8 +206,16 @@ class Renderer(object):
         if (self.__is_inside(x, y, polygon)):
           self.gl_vertex(x, y)
 
+  def __transform_vertex(self, vertex):
+    augmented_vertex = Matrix([[vertex[0]], [vertex[1]], [vertex[2]], [1]])
+    transformed_vertex = self.__model_matrix * augmented_vertex
+    rows = transformed_vertex.rows
+    return Vector((rows[0][0] / rows[3][0]), (rows[1][0] / rows[3][0]), (rows[2][0] / rows[3][0]))
+
   # Función que carga y dibuja un archivo .obj.
-  def gl_load_obj(self, obj_file, scale_factor, translate_factor, color=None):
+  def gl_load_obj(self, obj_file, translate_factor, scale_factor, rotate_factor, color=None):
+
+    self.gl_load_model_matrix(Vector(*translate_factor), Vector(*scale_factor), Vector(*rotate_factor))
 
     # Nueva definición del color del modelo.
     if (color is None):
@@ -227,10 +237,10 @@ class Renderer(object):
         fourth_face = (face[3][0] - 1)
 
         # Vértices del cuadrado a dibujar.
-        first_vertex = utils.transform_vertex(object_file.vertices[first_face], scale_factor, translate_factor)
-        second_vertex = utils.transform_vertex(object_file.vertices[second_face], scale_factor, translate_factor)
-        third_vertex = utils.transform_vertex(object_file.vertices[third_face], scale_factor, translate_factor)
-        fourth_vertex = utils.transform_vertex(object_file.vertices[fourth_face], scale_factor, translate_factor)
+        first_vertex = self.__transform_vertex(object_file.vertices[first_face])
+        second_vertex = self.__transform_vertex(object_file.vertices[second_face])
+        third_vertex = self.__transform_vertex(object_file.vertices[third_face])
+        fourth_vertex = self.__transform_vertex(object_file.vertices[fourth_face])
 
         if (self.__texture):
 
@@ -246,22 +256,22 @@ class Renderer(object):
           fourth_texture_vertex = Vector(*object_file.texture_vertices[fourth_texture_face])
 
           self.gl_draw_triangle(
-            (Vector(*first_vertex), Vector(*second_vertex), Vector(*third_vertex)),
+            (first_vertex, second_vertex, third_vertex),
             (first_texture_vertex, second_texture_vertex, third_texture_vertex),
             color=None
           )
 
           self.gl_draw_triangle(
-            (Vector(*first_vertex), Vector(*third_vertex), Vector(*fourth_vertex)),
-            (first_texture_vertex, fourth_texture_vertex, third_texture_vertex),
+            (fourth_vertex, first_vertex, third_vertex),
+            (fourth_texture_vertex, first_texture_vertex, third_texture_vertex),
             color=None
           )
         
         else:
           
           # Dibujo de los polígonos necesarios para pintar el modelo.
-          self.gl_draw_triangle((Vector(*first_vertex), Vector(*second_vertex), Vector(*third_vertex)), color=color)
-          self.gl_draw_triangle((Vector(*first_vertex), Vector(*third_vertex), Vector(*fourth_vertex)), color=color)
+          self.gl_draw_triangle((first_vertex, second_vertex, third_vertex), color=color)
+          self.gl_draw_triangle((first_vertex, third_vertex, fourth_vertex), color=color)
 
       # Dibujo de un triángulo.
       elif (len(face) == 3):
@@ -272,9 +282,9 @@ class Renderer(object):
         third_face = (face[2][0] - 1)
 
         # Vértices del triángulo a dibujar.
-        first_vertex = utils.transform_vertex(object_file.vertices[first_face], scale_factor, translate_factor)
-        second_vertex = utils.transform_vertex(object_file.vertices[second_face], scale_factor, translate_factor)
-        third_vertex = utils.transform_vertex(object_file.vertices[third_face], scale_factor, translate_factor)
+        first_vertex = self.__transform_vertex(object_file.vertices[first_face])
+        second_vertex = self.__transform_vertex(object_file.vertices[second_face])
+        third_vertex = self.__transform_vertex(object_file.vertices[third_face])
 
         if (self.__texture):
 
@@ -289,7 +299,7 @@ class Renderer(object):
           third_texture_vertex = Vector(*object_file.texture_vertices[third_texture_face])
           
           self.gl_draw_triangle(
-            (Vector(*first_vertex), Vector(*second_vertex), Vector(*third_vertex)),
+            (first_vertex, second_vertex, third_vertex),
             (first_texture_vertex, second_texture_vertex, third_texture_vertex),
             color=None
           )
@@ -297,7 +307,7 @@ class Renderer(object):
         else:
 
           # Dibujo de los polígonos necesarios para el triángulo.
-          self.gl_draw_triangle((Vector(*first_vertex), Vector(*second_vertex), Vector(*third_vertex)), color=color)
+          self.gl_draw_triangle((first_vertex, second_vertex, third_vertex), color=color)
 
   # Función que halla los límites de un triángulo a pintar.
   def __bounding_box(self, A, B, C):
@@ -402,6 +412,47 @@ class Renderer(object):
   # Función que carga una textura para el modelo.
   def gl_load_texture(self, texture):
     self.__texture = texture
+
+  def gl_load_model_matrix(self, translate=Vector(0, 0, 0), scale=Vector(1, 1, 1), rotate=Vector(0, 0, 0)):
+
+    translation_matrix = Matrix([
+      [1, 0, 0, translate.x],
+      [0, 1, 0, translate.y],
+      [0, 0, 1, translate.z],
+      [0, 0, 0, 1]
+    ])
+
+    scale_matrix = Matrix([
+      [scale.x, 0, 0, 0],
+      [0, scale.y, 0, 0],
+      [0, 0, scale.z, 0],
+      [0, 0, 0, 1]
+    ])    
+
+    rotation_x = Matrix([
+      [1, 0, 0, 0],
+      [0, math.cos(rotate.x), (-1 * math.sin(rotate.x)), 0],
+      [0, math.sin(rotate.x), math.cos(rotate.x), 0],
+      [0, 0, 0, 1]
+    ])
+    
+    rotation_y = Matrix([
+      [math.cos(rotate.y), math.sin(rotate.y), 0, 0],
+      [0, 1, 0, 0],
+      [(-1 * math.sin(rotate.y)), math.cos(rotate.y), 1, 0],
+      [0, 0, 0, 1]
+    ])
+    
+    rotation_z = Matrix([
+      [math.cos(rotate.z), (-1 * math.sin(rotate.z)), 0, 0],
+      [math.sin(rotate.z), math.cos(rotate.z), 0, 0],
+      [0, 0, 1, 0],
+      [0, 0, 0, 1]
+    ])
+    
+    rotation_matrix = rotation_x * rotation_y * rotation_z
+
+    self.__model_matrix = translation_matrix * rotation_matrix * scale_matrix
 
   # Función para renderizar la imagen creada.
   def gl_finish(self, filename="./images/image.bmp"):    

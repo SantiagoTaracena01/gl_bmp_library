@@ -9,7 +9,7 @@ Santiago Taracena Puga (20017)
 class Vector(object):
 
   # Método constructor de la clase Vector.
-  def __init__(self, x, y, z=0):
+  def __init__(self, x, y, z=0, w=0):
     self.x = x
     self.y = y
     self.z = z
