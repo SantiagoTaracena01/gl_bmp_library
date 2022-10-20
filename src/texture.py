@@ -32,11 +32,14 @@ class Texture(object):
     x, y = self.__get_x_and_y(tx, ty)
 
     # Nuevos colores con la intensidad aplicada.
-    b, g, r = (
-      round(self.pixels[y][x][0] * intensity),
-      round(self.pixels[y][x][1] * intensity),
-      round(self.pixels[y][x][2] * intensity),
-    )
+    try:
+      b, g, r = (
+        round(self.pixels[y][x][0] * intensity),
+        round(self.pixels[y][x][1] * intensity),
+        round(self.pixels[y][x][2] * intensity),
+      )
+    except:
+      b, g, r = 255, 255, 255
 
     # Retorno del color con su respectiva intensidad.
     return utils.color(r, g, b)
