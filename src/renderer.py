@@ -209,7 +209,7 @@ class Renderer(object):
 
   def __transform_vertex(self, vertex):
     augmented_vertex = Matrix([[vertex[0]], [vertex[1]], [vertex[2]], [1]])
-    transformed_vertex = self.__model_matrix * augmented_vertex
+    transformed_vertex = self.__model_matrix * self.__view_matrix * augmented_vertex
     rows = transformed_vertex.rows
     return Vector((rows[0][0] / rows[3][0]), (rows[1][0] / rows[3][0]), (rows[2][0] / rows[3][0]))
 
@@ -399,7 +399,7 @@ class Renderer(object):
         z = ((A.z * w) + (B.z * u) + (C.z * v))
 
         # Si el valor a pintar está frente al último valor del z-buffer, lo pintamos.
-        if (self.__z_buffer[x][y] < z):
+        if ((x < len(self.__z_buffer)) and (y < len(self.__z_buffer[0])) and (self.__z_buffer[x][y] < z)):
 
           self.__z_buffer[x][y] = z
 
@@ -456,7 +456,19 @@ class Renderer(object):
     self.__model_matrix = (translation_matrix * rotation_matrix * scale_matrix)
 
   def gl_load_view_matrix(self, prime_x, prime_y, prime_z, center):
-    ...
+    mi = Matrix([
+      [prime_x.x, prime_x.y, prime_x.z, 0],
+      [prime_y.x, prime_y.y, prime_y.z, 0],
+      [prime_z.x, prime_z.y, prime_z.z, 0],
+      [0, 0, 0, 1]
+    ])
+    op = Matrix([
+      [1, 0, 0, (-1 * center.x)],
+      [0, 1, 0, (-1 * center.y)],
+      [0, 0, 1, (-1 * center.z)],
+      [0, 0, 0, 1]
+    ])
+    self.__view_matrix = mi * op
 
   def gl_look_at(self, eye, center, up):
     z = (eye - center).norm()

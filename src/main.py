@@ -33,7 +33,7 @@ if __name__ == "__main__":
   start = time.time()
 
   # Proceso de renderización.
-  renderer.gl_look_at(Vector(-10, 0, 10), Vector(0, 0, 0), Vector(0, 1, 0))
+  renderer.gl_look_at(Vector(0, 0, 10), Vector(0, 0, 0), Vector(0, 1, 0))
   model_texture = Texture("./textures/model_txs.bmp")
   renderer.gl_load_texture(model_texture)
   renderer.gl_load_obj("./models/model.obj", TRANSLATE, SCALE, ROTATE, (1, 0.6, 0.85))
