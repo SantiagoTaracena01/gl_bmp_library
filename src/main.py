@@ -8,7 +8,9 @@ Santiago Taracena Puga (20017)
 # Módulos/librerías importadas para el desarrollo de main.py.
 from renderer import Renderer
 from texture import Texture
+from vector import Vector
 import time
+import math
 
 # Código principal del programa.
 if __name__ == "__main__":
@@ -18,8 +20,8 @@ if __name__ == "__main__":
   HEIGHT = 1000
 
   # Valores de escala y traslación del modelo.
-  SCALE = (400, 400, 0)
-  TRANSLATE = (0, 500, 0)
+  TRANSLATE = (500, 500, 0)
+  SCALE = (400, 400, 500)
   ROTATE = (0, 0, 0)
 
   # Instancia y creación de valores básicos del renderer.
@@ -31,6 +33,7 @@ if __name__ == "__main__":
   start = time.time()
 
   # Proceso de renderización.
+  renderer.gl_look_at(Vector(-10, 0, 10), Vector(0, 0, 0), Vector(0, 1, 0))
   model_texture = Texture("./textures/model_txs.bmp")
   renderer.gl_load_texture(model_texture)
   renderer.gl_load_obj("./models/model.obj", TRANSLATE, SCALE, ROTATE, (1, 0.6, 0.85))

@@ -36,6 +36,7 @@ class Renderer(object):
     self.__z_buffer = [[-999999 for x in range(self.__width)] for y in range(self.__height)]
     self.__texture = None
     self.__model_matrix = None
+    self.__view_matrix = None
     self.gl_clear()
 
   # Función que limpia la ventana a un sólo color.
@@ -437,9 +438,9 @@ class Renderer(object):
     ])
     
     rotation_y = Matrix([
-      [math.cos(rotate.y), math.sin(rotate.y), 0, 0],
+      [math.cos(rotate.y), 0, math.sin(rotate.y), 0],
       [0, 1, 0, 0],
-      [(-1 * math.sin(rotate.y)), math.cos(rotate.y), 1, 0],
+      [(-1 * math.sin(rotate.y)), 0, math.cos(rotate.y), 0],
       [0, 0, 0, 1]
     ])
     
@@ -450,9 +451,18 @@ class Renderer(object):
       [0, 0, 0, 1]
     ])
     
-    rotation_matrix = rotation_x * rotation_y * rotation_z
+    rotation_matrix = (rotation_x * rotation_y * rotation_z)
 
-    self.__model_matrix = translation_matrix * rotation_matrix * scale_matrix
+    self.__model_matrix = (translation_matrix * rotation_matrix * scale_matrix)
+
+  def gl_load_view_matrix(self, prime_x, prime_y, prime_z, center):
+    ...
+
+  def gl_look_at(self, eye, center, up):
+    z = (eye - center).norm()
+    x = (up * z).norm()
+    y = (z * x).norm()
+    self.gl_load_view_matrix(x, y, z, center)
 
   # Función para renderizar la imagen creada.
   def gl_finish(self, filename="./images/image.bmp"):    
