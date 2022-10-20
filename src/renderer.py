@@ -8,7 +8,7 @@ Santiago Taracena Puga (20017)
 # Módulos necesarios.
 from obj import Obj
 from vector import Vector
-from matrix import Matrix
+from camera import Camera
 import utils
 import bmp
 import math
@@ -35,10 +35,7 @@ class Renderer(object):
     self.__framebuffer = []
     self.__z_buffer = [[-999999 for x in range(self.__width)] for y in range(self.__height)]
     self.__texture = None
-    self.__model_matrix = None
-    self.__view_matrix = None
-    self.__projection_matrix = None
-    self.__viewport_matrix = None
+    self.__camera = Camera()
     self.__active_shader = None
     self.gl_clear()
 
@@ -86,7 +83,7 @@ class Renderer(object):
   def __relative_to_absolute_conversion(self, x, y):
     cx, cy = (self.__viewport_width // 2), (self.__viewport_height // 2)
     px, py = (round((x + 1) * cx) + self.__viewport_x_coordinate), (round((y + 1) * cy) + self.__viewport_y_coordinate)
-    return (px, py)
+    return px, py
 
   # Función que coloca un punto en la pantalla con coordenadas absolutas.
   def gl_vertex(self, x, y):
@@ -210,16 +207,10 @@ class Renderer(object):
         if (self.__is_inside(x, y, polygon)):
           self.gl_vertex(x, y)
 
-  def __transform_vertex(self, vertex):
-    augmented_vertex = Matrix([[vertex[0]], [vertex[1]], [vertex[2]], [1]])
-    transformed_vertex = self.__viewport_matrix * self.__projection_matrix * self.__model_matrix * self.__view_matrix * augmented_vertex
-    rows = transformed_vertex.rows
-    return Vector((rows[0][0] / rows[3][0]), (rows[1][0] / rows[3][0]), (rows[2][0] / rows[3][0]))
-
   # Función que carga y dibuja un archivo .obj.
   def gl_load_obj(self, obj_file, translate_factor, scale_factor, rotate_factor, color=None):
 
-    self.gl_load_model_matrix(Vector(*translate_factor), Vector(*scale_factor), Vector(*rotate_factor))
+    self.__camera.load_model_matrix(Vector(*translate_factor), Vector(*scale_factor), Vector(*rotate_factor))
 
     # Nueva definición del color del modelo.
     if (color is None):
@@ -241,10 +232,10 @@ class Renderer(object):
         fourth_face = (face[3][0] - 1)
 
         # Vértices del cuadrado a dibujar.
-        first_vertex = self.__transform_vertex(object_file.vertices[first_face])
-        second_vertex = self.__transform_vertex(object_file.vertices[second_face])
-        third_vertex = self.__transform_vertex(object_file.vertices[third_face])
-        fourth_vertex = self.__transform_vertex(object_file.vertices[fourth_face])
+        first_vertex = self.__camera.transform_vertex(object_file.vertices[first_face])
+        second_vertex = self.__camera.transform_vertex(object_file.vertices[second_face])
+        third_vertex = self.__camera.transform_vertex(object_file.vertices[third_face])
+        fourth_vertex = self.__camera.transform_vertex(object_file.vertices[fourth_face])
 
         if (self.__texture):
 
@@ -286,9 +277,9 @@ class Renderer(object):
         third_face = (face[2][0] - 1)
 
         # Vértices del triángulo a dibujar.
-        first_vertex = self.__transform_vertex(object_file.vertices[first_face])
-        second_vertex = self.__transform_vertex(object_file.vertices[second_face])
-        third_vertex = self.__transform_vertex(object_file.vertices[third_face])
+        first_vertex = self.__camera.transform_vertex(object_file.vertices[first_face])
+        second_vertex = self.__camera.transform_vertex(object_file.vertices[second_face])
+        third_vertex = self.__camera.transform_vertex(object_file.vertices[third_face])
 
         if (self.__texture):
 
@@ -420,89 +411,18 @@ class Renderer(object):
   def gl_load_texture(self, texture):
     self.__texture = texture
 
-  def gl_load_model_matrix(self, translate=Vector(0, 0, 0), scale=Vector(1, 1, 1), rotate=Vector(0, 0, 0)):
-
-    translation_matrix = Matrix([
-      [1, 0, 0, translate.x],
-      [0, 1, 0, translate.y],
-      [0, 0, 1, translate.z],
-      [0, 0, 0, 1]
-    ])
-
-    scale_matrix = Matrix([
-      [scale.x, 0, 0, 0],
-      [0, scale.y, 0, 0],
-      [0, 0, scale.z, 0],
-      [0, 0, 0, 1]
-    ])    
-
-    rotation_x = Matrix([
-      [1, 0, 0, 0],
-      [0, math.cos(rotate.x), (-1 * math.sin(rotate.x)), 0],
-      [0, math.sin(rotate.x), math.cos(rotate.x), 0],
-      [0, 0, 0, 1]
-    ])
-    
-    rotation_y = Matrix([
-      [math.cos(rotate.y), 0, math.sin(rotate.y), 0],
-      [0, 1, 0, 0],
-      [(-1 * math.sin(rotate.y)), 0, math.cos(rotate.y), 0],
-      [0, 0, 0, 1]
-    ])
-    
-    rotation_z = Matrix([
-      [math.cos(rotate.z), (-1 * math.sin(rotate.z)), 0, 0],
-      [math.sin(rotate.z), math.cos(rotate.z), 0, 0],
-      [0, 0, 1, 0],
-      [0, 0, 0, 1]
-    ])
-    
-    rotation_matrix = (rotation_x * rotation_y * rotation_z)
-
-    self.__model_matrix = (translation_matrix * rotation_matrix * scale_matrix)
-
-  def gl_load_view_matrix(self, prime_x, prime_y, prime_z, center):
-    mi = Matrix([
-      [prime_x.x, prime_x.y, prime_x.z, 0],
-      [prime_y.x, prime_y.y, prime_y.z, 0],
-      [prime_z.x, prime_z.y, prime_z.z, 0],
-      [0, 0, 0, 1]
-    ])
-    op = Matrix([
-      [1, 0, 0, (-1 * center.x)],
-      [0, 1, 0, (-1 * center.y)],
-      [0, 0, 1, (-1 * center.z)],
-      [0, 0, 0, 1]
-    ])
-    self.__view_matrix = mi * op
-
-  def gl_load_projection_matrix(self, eye, center):
-    coefficient = (-1 / (eye.length() - center.length()))
-    self.__projection_matrix = Matrix([
-      [1, 0, 0, 0],
-      [0, 1, 0, 0],
-      [0, 0, 1, 0],
-      [0, 0, coefficient, 1]
-    ])
-
-  def gl_load_viewport_matrix(self):
-    x, y = 0, 0
-    w, h = (self.__width / 2), (self.__height / 2)
-    self.__viewport_matrix = Matrix([
-      [w, 0, 0, (x + w)],
-      [0, h, 0, (y + h)],
-      [0, 0, 128, 128],
-      [0, 0, 0, 1]
-    ])
-
+  # Función para determinar la dirección de la cámara del renderer.
   def gl_look_at(self, eye, center, up):
     z = (eye - center).norm()
     x = (up * z).norm()
     y = (z * x).norm()
-    self.gl_load_view_matrix(x, y, z, center)
-    self.gl_load_projection_matrix(eye, center)
-    self.gl_load_viewport_matrix()
+    self.__camera.look_at(x, y, z, eye, center, self.__width, self.__height)
 
+  # ! PASAR SHADERS A UN ARCHIVO APARTE.
+  # ! PASAR SHADERS A UN ARCHIVO APARTE.
+  # ! PASAR SHADERS A UN ARCHIVO APARTE.
+  # ! PASAR SHADERS A UN ARCHIVO APARTE.
+  # ! PASAR SHADERS A UN ARCHIVO APARTE.
   def __shader(self, **kwargs):
     y = kwargs["y"]
     if (y < 100):
