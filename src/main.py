@@ -18,7 +18,7 @@ if __name__ == "__main__":
   HEIGHT = 1000
 
   # Valores de escala y traslación del modelo.
-  SCALE = (2400, 2400, 2400)
+  SCALE = (4000, 4000, 0)
   TRANSLATE = (500, 500, 0)
 
   # Instancia y creación de valores básicos del renderer.

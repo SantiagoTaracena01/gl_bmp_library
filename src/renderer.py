@@ -232,12 +232,8 @@ class Renderer(object):
         third_vertex = utils.transform_vertex(object_file.vertices[third_face], scale_factor, translate_factor)
         fourth_vertex = utils.transform_vertex(object_file.vertices[fourth_face], scale_factor, translate_factor)
 
-        # Dibujo de los polígonos necesarios para pintar el modelo.
-        self.gl_draw_triangle((Vector(*first_vertex), Vector(*second_vertex), Vector(*third_vertex)), color=color)
-        self.gl_draw_triangle((Vector(*first_vertex), Vector(*third_vertex), Vector(*fourth_vertex)), color=color)
-
         if (self.__texture):
-          
+
           # Cálculo de las caras del triángulo.
           first_texture_face = (face[0][1] - 1)
           second_texture_face = (face[1][1] - 1)
@@ -256,10 +252,16 @@ class Renderer(object):
           )
 
           self.gl_draw_triangle(
-            (Vector(*first_vertex), Vector(*fourth_vertex), Vector(*third_vertex)),
+            (Vector(*first_vertex), Vector(*third_vertex), Vector(*fourth_vertex)),
             (first_texture_vertex, fourth_texture_vertex, third_texture_vertex),
             color=None
           )
+        
+        else:
+          
+          # Dibujo de los polígonos necesarios para pintar el modelo.
+          self.gl_draw_triangle((Vector(*first_vertex), Vector(*second_vertex), Vector(*third_vertex)), color=color)
+          self.gl_draw_triangle((Vector(*first_vertex), Vector(*third_vertex), Vector(*fourth_vertex)), color=color)
 
       # Dibujo de un triángulo.
       elif (len(face) == 3):
@@ -350,7 +352,7 @@ class Renderer(object):
       tA, tB, tC = texture_points[0], texture_points[1], texture_points[2]
 
     # Luz, vector normal e intensidad del triángulo.
-    light = Vector(0, 5, -10)
+    light = Vector(0, 0, -1)
     normal = ((C - A) * (B - A))
     intensity = (light.norm() @ normal.norm())
 
@@ -379,11 +381,11 @@ class Renderer(object):
         w, v, u = self.__barycentric_coords(A, B, C, Vector(x, y))
 
         # Casos en los que el punto no se encuentra en el triángulo.
-        if (w < 0 or v < 0 or u < 0):
+        if ((w < 0) or (v < 0) or (u < 0)):
           continue
 
         # Cálculo de la coordenada z del triángulo a pintar.
-        z = ((A.z * w) + (B.z * v) + (C.z * u))
+        z = ((A.z * w) + (B.z * u) + (C.z * v))
 
         # Si el valor a pintar está frente al último valor del z-buffer, lo pintamos.
         if (self.__z_buffer[x][y] < z):
@@ -391,9 +393,8 @@ class Renderer(object):
           self.__z_buffer[x][y] = z
 
           if (self.__texture):
-            tx = tA.x * w + tB.x * u + tC.x * v
-            ty = tA.y * w + tB.y * u + tC.y * v
-          
+            tx = ((tA.x * w) + (tB.x * u) + (tC.x * v))
+            ty = ((tA.y * w) + (tB.y * u) + (tC.y * v))
             self.__current_color = self.__texture.get_color_with_intensity(tx, ty, intensity)
 
           self.gl_vertex(x, y)
