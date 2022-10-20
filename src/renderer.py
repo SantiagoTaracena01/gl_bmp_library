@@ -39,6 +39,7 @@ class Renderer(object):
     self.__view_matrix = None
     self.__projection_matrix = None
     self.__viewport_matrix = None
+    self.__active_shader = None
     self.gl_clear()
 
   # Función que limpia la ventana a un sólo color.
@@ -404,12 +405,14 @@ class Renderer(object):
         if ((abs(x) < len(self.__z_buffer)) and (abs(y) < len(self.__z_buffer[0])) and (self.__z_buffer[x][y] < z)):
 
           self.__z_buffer[x][y] = z
-          self.__current_color = self.__active_shader()
-
-          if (self.__texture):
-            tx = ((tA.x * w) + (tB.x * u) + (tC.x * v))
-            ty = ((tA.y * w) + (tB.y * u) + (tC.y * v))
-            self.__current_color = self.__texture.get_color_with_intensity(tx, ty, intensity)
+          
+          if (self.__active_shader):
+            self.__current_color = self.__active_shader(y=y)
+          else:
+            if (self.__texture):
+              tx = ((tA.x * w) + (tB.x * u) + (tC.x * v))
+              ty = ((tA.y * w) + (tB.y * u) + (tC.y * v))
+              self.__current_color = self.__texture.get_color_with_intensity(tx, ty, intensity)
 
           self.gl_vertex(x, y)
 
@@ -500,8 +503,18 @@ class Renderer(object):
     self.gl_load_projection_matrix(eye, center)
     self.gl_load_viewport_matrix()
 
-  def __shader(self):
-    return utils.color(1, 0, 0)
+  def __shader(self, **kwargs):
+    y = kwargs["y"]
+    if (y < 100):
+      return utils.color(255, 0, 0)
+    elif (y < 150):
+      return utils.color(200, 50, 50)
+    elif y < 200:
+      return utils.color(150, 100, 100)
+    elif (y < 250):
+      return utils.color(100, 200, 200)
+    else:
+      return utils.color(0, 255, 255)
 
   def gl_set_shader(self, shader=None):
     self.__active_shader = shader or self.__shader
