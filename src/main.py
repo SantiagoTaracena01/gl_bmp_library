@@ -20,9 +20,9 @@ if __name__ == "__main__":
   HEIGHT = 1000
 
   # Valores de escala y traslación del modelo.
-  TRANSLATE = (500, 500, 0)
-  SCALE = (400, 400, 500)
-  ROTATE = (0, 0, 0)
+  TRANSLATE = (0, 0, 0)
+  SCALE = (1, 1, 1)
+  ROTATE = (0, (math.pi / 6), 0)
 
   # Instancia y creación de valores básicos del renderer.
   renderer = Renderer()
@@ -33,7 +33,7 @@ if __name__ == "__main__":
   start = time.time()
 
   # Proceso de renderización.
-  renderer.gl_look_at(Vector(0, 0, 10), Vector(0, 0, 0), Vector(0, 1, 0))
+  renderer.gl_look_at(Vector(0, 0, 5), Vector(0, 0, 0), Vector(0, 1, 0))
   model_texture = Texture("./textures/model_txs.bmp")
   renderer.gl_load_texture(model_texture)
   renderer.gl_load_obj("./models/model.obj", TRANSLATE, SCALE, ROTATE, (1, 0.6, 0.85))

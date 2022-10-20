@@ -37,6 +37,8 @@ class Renderer(object):
     self.__texture = None
     self.__model_matrix = None
     self.__view_matrix = None
+    self.__projection_matrix = None
+    self.__viewport_matrix = None
     self.gl_clear()
 
   # Función que limpia la ventana a un sólo color.
@@ -209,7 +211,7 @@ class Renderer(object):
 
   def __transform_vertex(self, vertex):
     augmented_vertex = Matrix([[vertex[0]], [vertex[1]], [vertex[2]], [1]])
-    transformed_vertex = self.__model_matrix * self.__view_matrix * augmented_vertex
+    transformed_vertex = self.__viewport_matrix * self.__projection_matrix * self.__model_matrix * self.__view_matrix * augmented_vertex
     rows = transformed_vertex.rows
     return Vector((rows[0][0] / rows[3][0]), (rows[1][0] / rows[3][0]), (rows[2][0] / rows[3][0]))
 
@@ -399,9 +401,10 @@ class Renderer(object):
         z = ((A.z * w) + (B.z * u) + (C.z * v))
 
         # Si el valor a pintar está frente al último valor del z-buffer, lo pintamos.
-        if ((x < len(self.__z_buffer)) and (y < len(self.__z_buffer[0])) and (self.__z_buffer[x][y] < z)):
+        if ((abs(x) < len(self.__z_buffer)) and (abs(y) < len(self.__z_buffer[0])) and (self.__z_buffer[x][y] < z)):
 
           self.__z_buffer[x][y] = z
+          self.__current_color = self.__active_shader()
 
           if (self.__texture):
             tx = ((tA.x * w) + (tB.x * u) + (tC.x * v))
@@ -470,11 +473,38 @@ class Renderer(object):
     ])
     self.__view_matrix = mi * op
 
+  def gl_load_projection_matrix(self, eye, center):
+    coefficient = (-1 / (eye.length() - center.length()))
+    self.__projection_matrix = Matrix([
+      [1, 0, 0, 0],
+      [0, 1, 0, 0],
+      [0, 0, 1, 0],
+      [0, 0, coefficient, 1]
+    ])
+
+  def gl_load_viewport_matrix(self):
+    x, y = 0, 0
+    w, h = (self.__width / 2), (self.__height / 2)
+    self.__viewport_matrix = Matrix([
+      [w, 0, 0, (x + w)],
+      [0, h, 0, (y + h)],
+      [0, 0, 128, 128],
+      [0, 0, 0, 1]
+    ])
+
   def gl_look_at(self, eye, center, up):
     z = (eye - center).norm()
     x = (up * z).norm()
     y = (z * x).norm()
     self.gl_load_view_matrix(x, y, z, center)
+    self.gl_load_projection_matrix(eye, center)
+    self.gl_load_viewport_matrix()
+
+  def __shader(self):
+    return utils.color(1, 0, 0)
+
+  def gl_set_shader(self, shader=None):
+    self.__active_shader = shader or self.__shader
 
   # Función para renderizar la imagen creada.
   def gl_finish(self, filename="./images/image.bmp"):    
