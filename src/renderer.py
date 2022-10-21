@@ -33,7 +33,7 @@ class Renderer(object):
     self.__background_color = utils.BLACK
     self.__current_color = utils.WHITE
     self.__framebuffer = []
-    self.__z_buffer = [[-999999 for x in range(self.__width)] for y in range(self.__height)]
+    self.__z_buffer = [[-999_999 for x in range(self.__width)] for y in range(self.__height)]
     self.__texture = None
     self.__camera = Camera()
     self.__active_shader = None
@@ -50,7 +50,7 @@ class Renderer(object):
       math.ceil(g * 255),
       math.ceil(b * 255),
     )
-  
+
   # Función que cambia el color de los dibujos realizados.
   def gl_color(self, r, g, b):
     self.__current_color = utils.color(
@@ -103,7 +103,7 @@ class Renderer(object):
 
   # Función que dibuja una línea en la pantalla.
   def gl_line(self, x0, y0, x1, y1):
-    
+
     # Redondeo de los puntos de la línea.
     x0, y0, x1, y1 = round(x0), round(y0), round(x1), round(y1)
 
@@ -157,12 +157,6 @@ class Renderer(object):
       x1, y1 = self.__relative_to_absolute_conversion(x1, y1)
       self.gl_line(x0, y0, x1, y1)
 
-  # Función que dibuja una línea dados dos puntos p y q.
-  def gl_vector_line(self, P, Q):
-    x0, y0 = P.x, P.y
-    x1, y1 = Q.x, Q.y
-    self.gl_line(x0, y0, x1, y1)
-
   # Función que calcula si un punto está dentro de un polígono.
   def __is_inside(self, x, y, polygon):
 
@@ -210,6 +204,7 @@ class Renderer(object):
   # Función que carga y dibuja un archivo .obj.
   def gl_load_obj(self, obj_file, translate_factor, scale_factor, rotate_factor, color=None):
 
+    # Carga de la matriz de modelo de la cámara con los factores dados a gl_load_obj().
     self.__camera.load_model_matrix(Vector(*translate_factor), Vector(*scale_factor), Vector(*rotate_factor))
 
     # Nueva definición del color del modelo.
@@ -237,6 +232,7 @@ class Renderer(object):
         third_vertex = self.__camera.transform_vertex(object_file.vertices[third_face])
         fourth_vertex = self.__camera.transform_vertex(object_file.vertices[fourth_face])
 
+        # Carga de texturas si hay una textura activa para el modelo.
         if (self.__texture):
 
           # Cálculo de las caras del triángulo.
@@ -244,27 +240,27 @@ class Renderer(object):
           second_texture_face = (face[1][1] - 1)
           third_texture_face = (face[2][1] - 1)
           fourth_texture_face = (face[3][1] - 1)
-          
+
+          # Vértices de la textura cargada.
           first_texture_vertex = Vector(*object_file.texture_vertices[first_texture_face])
           second_texture_vertex = Vector(*object_file.texture_vertices[second_texture_face])
           third_texture_vertex = Vector(*object_file.texture_vertices[third_texture_face])
           fourth_texture_vertex = Vector(*object_file.texture_vertices[fourth_texture_face])
 
+          # Triángulo superior del cuadrado texturizado.
           self.gl_draw_triangle(
             (first_vertex, second_vertex, third_vertex),
-            (first_texture_vertex, second_texture_vertex, third_texture_vertex),
-            color=None
+            (first_texture_vertex, second_texture_vertex, third_texture_vertex)
           )
 
+          # Triángulo inferior del cuadro texturizado.
           self.gl_draw_triangle(
             (fourth_vertex, first_vertex, third_vertex),
-            (fourth_texture_vertex, first_texture_vertex, third_texture_vertex),
-            color=None
+            (fourth_texture_vertex, first_texture_vertex, third_texture_vertex)
           )
-        
+
+        # Polígonos a dibujar si no hay una textura.
         else:
-          
-          # Dibujo de los polígonos necesarios para pintar el modelo.
           self.gl_draw_triangle((first_vertex, second_vertex, third_vertex), color=color)
           self.gl_draw_triangle((first_vertex, third_vertex, fourth_vertex), color=color)
 
@@ -281,6 +277,7 @@ class Renderer(object):
         second_vertex = self.__camera.transform_vertex(object_file.vertices[second_face])
         third_vertex = self.__camera.transform_vertex(object_file.vertices[third_face])
 
+        # Carga de texturas si hay una textura activa.
         if (self.__texture):
 
           # Cálculo de las caras del triángulo.
@@ -292,16 +289,15 @@ class Renderer(object):
           first_texture_vertex = Vector(*object_file.texture_vertices[first_texture_face])
           second_texture_vertex = Vector(*object_file.texture_vertices[second_texture_face])
           third_texture_vertex = Vector(*object_file.texture_vertices[third_texture_face])
-          
+
+          # Triángulo texturizado a dibujar.
           self.gl_draw_triangle(
             (first_vertex, second_vertex, third_vertex),
-            (first_texture_vertex, second_texture_vertex, third_texture_vertex),
-            color=None
+            (first_texture_vertex, second_texture_vertex, third_texture_vertex)
           )
 
+        # Polígonos necesarios para el triángulo sin texturas.
         else:
-
-          # Dibujo de los polígonos necesarios para el triángulo.
           self.gl_draw_triangle((first_vertex, second_vertex, third_vertex), color=color)
 
   # Función que halla los límites de un triángulo a pintar.
@@ -353,6 +349,7 @@ class Renderer(object):
     # Puntos y texturas a dibujar con el triángulo.
     A, B, C = points[0], points[1], points[2]
 
+    # Puntos obtenidos de las texturas cargadas.
     if (self.__texture):
       tA, tB, tC = texture_points[0], texture_points[1], texture_points[2]
 
@@ -395,16 +392,21 @@ class Renderer(object):
         # Si el valor a pintar está frente al último valor del z-buffer, lo pintamos.
         if ((abs(x) < len(self.__z_buffer)) and (abs(y) < len(self.__z_buffer[0])) and (self.__z_buffer[x][y] < z)):
 
+          # Definición de un nuevo valor del z-buffer.
           self.__z_buffer[x][y] = z
-          
+
+          # Coloración de un shader cargado.
           if (self.__active_shader):
             self.__current_color = self.__active_shader(y=y)
+
+          # Coloración de una textura cargada.
           else:
             if (self.__texture):
               tx = ((tA.x * w) + (tB.x * u) + (tC.x * v))
               ty = ((tA.y * w) + (tB.y * u) + (tC.y * v))
               self.__current_color = self.__texture.get_color_with_intensity(tx, ty, intensity)
 
+          # Punto del triángulo a dibujar.
           self.gl_vertex(x, y)
 
   # Función que carga una textura para el modelo.
