@@ -21,7 +21,7 @@ realizar esta librería son las siguientes.
 En esta sección me dedicaré a colocar las rutas en las que se encuentran mis entregas para las diferentes
 tareas del renderer. Por favor revisar las entregas. Gracias de antemano.
 
-- SR1: Ya está calificado y tal, aunque no tengo la entrega aquí.
+- SR1: ./src/images/point.bmp
 - SR2: ./src/images/house.bmp
 - SR3: ./src/images/hylian_shield.bmp
 - SR4: ./src/images/yoshi.bmp

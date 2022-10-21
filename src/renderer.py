@@ -67,10 +67,10 @@ class Renderer(object):
 
   # Función que crea un viewport sobre el cuál dibujar.
   def gl_viewport(self, x, y, width, height):
-    self.__viewport_x_coordinate = x
-    self.__viewport_y_coordinate = y
-    self.__viewport_width = width
-    self.__viewport_height = height
+    self.__viewport_x_coordinate = round(x)
+    self.__viewport_y_coordinate = round(y)
+    self.__viewport_width = round(width)
+    self.__viewport_height = round(height)
     for w in range(self.__viewport_width):
       for h in range(self.__viewport_height):
         self.__framebuffer[self.__viewport_y_coordinate + h][self.__viewport_x_coordinate + w] = self.__background_color
