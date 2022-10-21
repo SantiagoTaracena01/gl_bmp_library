@@ -20,8 +20,8 @@ if __name__ == "__main__":
   HEIGHT = 1000
 
   # Valores de traslación, escala y rotación del modelo.
-  TRANSLATE = (0, -0.5, 0)
-  SCALE = (3, 3, 3)
+  TRANSLATE = (0, 0, 0)
+  SCALE = (1, 1, 1)
   ROTATE = (0, 0, 0)
 
   # Instancia y creación de valores básicos del renderer.
@@ -34,10 +34,10 @@ if __name__ == "__main__":
 
   # Proceso de renderización.
   renderer.gl_look_at(Vector(0, 0, 10), Vector(0, 0, 0), Vector(0, 1, 0))
-  model_texture = Texture("./textures/cat_txs.bmp")
+  model_texture = Texture("./textures/model_txs.bmp")
   renderer.gl_load_texture(model_texture)
-  renderer.gl_load_obj("./models/cat.obj", TRANSLATE, SCALE, ROTATE)
-  filename = renderer.gl_finish("./images/sr6/medium_shot.bmp")
+  renderer.gl_load_obj("./models/model.obj", TRANSLATE, SCALE, ROTATE)
+  filename = renderer.gl_finish()
 
   # Impresión de resultados finales.
   print(f"\nRendering process has been finished in {round((time.time() - start), 4)} seconds! Check {filename}!\n")
