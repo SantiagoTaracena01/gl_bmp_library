@@ -19,7 +19,7 @@ realizar esta librería son las siguientes.
 ### Información importante para auxiliares
 
 En esta sección me dedicaré a colocar las rutas en las que se encuentran mis entregas para las diferentes
-tareas del renderer. Por favor revisar las entregas. Gracias de antemano.
+tareas del renderer. Por favor revisar las entregas. ¡Gracias de antemano!
 
 - SR1: ./src/images/point.bmp
 - SR2: ./src/images/house.bmp
