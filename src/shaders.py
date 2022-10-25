@@ -7,7 +7,8 @@ Santiago Taracena Puga (20017)
 
 import utils
 
-def my_first_shader(y):
+def my_first_shader(**kwargs):
+  y = kwargs["y"]
   if (y < 100):
     return utils.color(255, 0, 0)
   elif (y < 150):
@@ -18,3 +19,6 @@ def my_first_shader(y):
     return utils.color(100, 200, 200)
   else:
     return utils.color(0, 255, 255)
+
+def model_shader():
+  return 0

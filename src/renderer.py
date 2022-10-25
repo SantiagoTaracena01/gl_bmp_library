@@ -397,7 +397,7 @@ class Renderer(object):
 
           # Coloración de un shader cargado.
           if (self.__active_shader):
-            self.__current_color = self.__active_shader(y=y)
+            self.__current_color = self.__active_shader(y=y, x=x)
 
           # Coloración de una textura cargada.
           else:
@@ -421,7 +421,7 @@ class Renderer(object):
     self.__camera.look_at(x, y, z, eye, center, self.__width, self.__height)
 
   # Función para cargar un shader al renderer.
-  def gl_set_shader(self, shader):
+  def gl_load_shader(self, shader):
     self.__active_shader = shader
 
   # Función para renderizar la imagen creada.
