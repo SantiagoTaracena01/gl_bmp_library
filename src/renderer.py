@@ -420,26 +420,9 @@ class Renderer(object):
     y = (z * x).norm()
     self.__camera.look_at(x, y, z, eye, center, self.__width, self.__height)
 
-  # ! PASAR SHADERS A UN ARCHIVO APARTE.
-  # ! PASAR SHADERS A UN ARCHIVO APARTE.
-  # ! PASAR SHADERS A UN ARCHIVO APARTE.
-  # ! PASAR SHADERS A UN ARCHIVO APARTE.
-  # ! PASAR SHADERS A UN ARCHIVO APARTE.
-  def __shader(self, **kwargs):
-    y = kwargs["y"]
-    if (y < 100):
-      return utils.color(255, 0, 0)
-    elif (y < 150):
-      return utils.color(200, 50, 50)
-    elif y < 200:
-      return utils.color(150, 100, 100)
-    elif (y < 250):
-      return utils.color(100, 200, 200)
-    else:
-      return utils.color(0, 255, 255)
-
-  def gl_set_shader(self, shader=None):
-    self.__active_shader = shader or self.__shader
+  # Función para cargar un shader al renderer.
+  def gl_set_shader(self, shader):
+    self.__active_shader = shader
 
   # Función para renderizar la imagen creada.
   def gl_finish(self, filename="./images/image.bmp"):    
