@@ -17,10 +17,16 @@ Posibles argumentos de un shader:
 - normal_coords: Coordenadas normales del modelo.
 """
 
+# Librerías importantes para el desarrollo del archivo.
 import utils
 
+# Primer shader realizado en clase.
 def my_first_shader(**kwargs):
+
+  # Altura y en la que se ubica el renderer.
   y = kwargs["y"]
+
+  # Colores a retornar por el shader.
   if (y < 100):
     return utils.color(255, 0, 0)
   elif (y < 150):
@@ -32,17 +38,23 @@ def my_first_shader(**kwargs):
   else:
     return utils.color(0, 255, 255)
 
+# Shader desarrollado para el laboratorio 02.
 def planet_shader(**kwargs):
+
+  # Parámetros necesarios para el shader.
   x = kwargs["x"]
   y = kwargs["y"]
   width = kwargs["width"]
   height = kwargs["height"]
 
+  # Coordenadas relativas en las que se encuentra el renderer.
   relative_x, relative_y = utils.absolute_to_relative_conversion(x, y, width, height)
-  distance = ((((relative_x ** 2) + (relative_y ** 2)) ** 0.5))
+  distance = (((relative_x ** 2) + (relative_y ** 2)) ** 0.5)
 
+  # Factor para determinar la claridad/oscuridad del punto a colorear.
   factor = (1 - distance)
 
+  # Colores a asignar por el shader.
   if ((175 <= y <= 200) or (300 <= y <= 325) or (425 <= y <= 450) or (550 <= y <= 575) or (675 <= y <= 700) or (800 <= y <= 825)):
     r, g, b = round(60 * factor), round(80 * factor), round(215 * factor)
   elif ((200 <= y <= 225) or (275 <= y <= 300) or (450 <= y <= 475) or (525 <= y <= 550) or (700 <= y <= 725) or (775 <= y <= 800)):
@@ -52,6 +64,7 @@ def planet_shader(**kwargs):
   else:
     r, g, b = round(60 * factor), round(100 * factor), round(255 * factor)
 
+  # Retorno del color del shader.
   return utils.color(r, g, b)
 
 def model_shader():
