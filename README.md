@@ -13,8 +13,8 @@ realizar esta librería son las siguientes.
 - [x] Coloreado de modelos mediante el uso de flat shading.
 - [x] Carga de texturas .bmp para los modelos.
 - [x] Cámara para cambiar la perspectiva y tamaño de los modelos
-- [ ] Carga de shaders para los modelos.
-- [ ] Carga de fondos de pantalla mediante archivos .bmp.
+- [x] Carga de shaders para los modelos.
+- [x] Carga de fondos de pantalla mediante archivos .bmp.
 
 ### Información importante para auxiliares
 
