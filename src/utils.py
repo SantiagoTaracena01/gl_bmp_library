@@ -15,6 +15,12 @@ word = lambda word: struct.pack("=h", word)
 dword = lambda dword: struct.pack("=l", dword)
 unpack = lambda buffer: struct.unpack("=l", buffer)[0]
 
+# Función que convierte coordenadas absolutas a relativas.
+def absolute_to_relative_conversion(x, y, width, height):
+  cx, cy = (width // 2), (height // 2)
+  px, py = ((x - cx) / cx), ((y - cy) / cy)
+  return px, py
+
 # Constantes extra utilizadas.
 BLACK = color(0, 0, 0)
 WHITE = color(255, 255, 255)

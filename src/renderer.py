@@ -37,6 +37,7 @@ class Renderer(object):
     self.__texture = None
     self.__camera = Camera()
     self.__active_shader = None
+    self.__light = Vector(0, 0, -1)
     self.gl_clear()
 
   # Función que limpia la ventana a un sólo color.
@@ -235,7 +236,7 @@ class Renderer(object):
         # Carga de texturas si hay una textura activa para el modelo.
         if (self.__texture):
 
-          # Cálculo de las caras del triángulo.
+          # Cálculo de las caras del cuadrado.
           first_texture_face = (face[0][1] - 1)
           second_texture_face = (face[1][1] - 1)
           third_texture_face = (face[2][1] - 1)
@@ -247,16 +248,30 @@ class Renderer(object):
           third_texture_vertex = Vector(*object_file.texture_vertices[third_texture_face])
           fourth_texture_vertex = Vector(*object_file.texture_vertices[fourth_texture_face])
 
+          # Cálculo de las normales de las caras del cuadrado.
+          first_normal_face = (face[0][2] - 1)
+          second_normal_face = (face[1][2] - 1)
+          third_normal_face = (face[2][2] - 1)
+          fourth_normal_face = (face[3][2] - 1)
+
+          # Vértices de la textura cargada.
+          first_normal_vertex = Vector(*object_file.normal_vertices[first_normal_face])
+          second_normal_vertex = Vector(*object_file.normal_vertices[second_normal_face])
+          third_normal_vertex = Vector(*object_file.normal_vertices[third_normal_face])
+          fourth_normal_vertex = Vector(*object_file.normal_vertices[fourth_normal_face])
+
           # Triángulo superior del cuadrado texturizado.
           self.gl_draw_triangle(
             (first_vertex, second_vertex, third_vertex),
-            (first_texture_vertex, second_texture_vertex, third_texture_vertex)
+            (first_texture_vertex, second_texture_vertex, third_texture_vertex),
+            (first_normal_vertex, second_normal_vertex, third_normal_vertex)
           )
 
           # Triángulo inferior del cuadro texturizado.
           self.gl_draw_triangle(
             (fourth_vertex, first_vertex, third_vertex),
-            (fourth_texture_vertex, first_texture_vertex, third_texture_vertex)
+            (fourth_texture_vertex, first_texture_vertex, third_texture_vertex),
+            (fourth_normal_vertex, first_normal_vertex, third_normal_vertex)
           )
 
         # Polígonos a dibujar si no hay una textura.
@@ -290,10 +305,21 @@ class Renderer(object):
           second_texture_vertex = Vector(*object_file.texture_vertices[second_texture_face])
           third_texture_vertex = Vector(*object_file.texture_vertices[third_texture_face])
 
+          # Cálculo de las normales de las caras del triángulo.
+          first_normal_face = (face[0][2] - 1)
+          second_normal_face = (face[1][2] - 1)
+          third_normal_face = (face[2][2] - 1)
+
+          # Vértices de las normales del triángulo a dibujar.
+          first_normal_vertex = Vector(*object_file.normal_vertices[first_normal_face])
+          second_normal_vertex = Vector(*object_file.normal_vertices[second_normal_face])
+          third_normal_vertex = Vector(*object_file.normal_vertices[third_normal_face])
+
           # Triángulo texturizado a dibujar.
           self.gl_draw_triangle(
             (first_vertex, second_vertex, third_vertex),
-            (first_texture_vertex, second_texture_vertex, third_texture_vertex)
+            (first_texture_vertex, second_texture_vertex, third_texture_vertex),
+            (first_normal_vertex, second_normal_vertex, third_normal_vertex)
           )
 
         # Polígonos necesarios para el triángulo sin texturas.
@@ -344,19 +370,21 @@ class Renderer(object):
     return (w, v, u)
 
   # Función que dibuja un triángulo dados tres puntos A, B y C.
-  def gl_draw_triangle(self, points, texture_points=(Vector(0, 0, 0), Vector(0, 0, 0), Vector(0, 0, 0)), color=None):
+  def gl_draw_triangle(self, points, texture_points=(Vector(0, 0, 0), Vector(0, 0, 0), Vector(0, 0, 0)), normal_points=(Vector(0, 0, 0), Vector(0, 0, 0), Vector(0, 0, 0)), color=None):
 
     # Puntos y texturas a dibujar con el triángulo.
     A, B, C = points[0], points[1], points[2]
 
     # Puntos obtenidos de las texturas cargadas.
     if (self.__texture):
-      tA, tB, tC = texture_points[0], texture_points[1], texture_points[2]
+      tA, tB, tC = texture_points
 
-    # Luz, vector normal e intensidad del triángulo.
-    light = Vector(0, 0, -1)
+    if (self.__active_shader):
+      nA, nB, nC = normal_points
+
+    # Vector normal e intensidad del triángulo.
     normal = ((C - A) * (B - A))
-    intensity = (light.norm() @ normal.norm())
+    intensity = (self.__light.norm() @ normal.norm())
 
     # Si la intensidad es menor a cero, no dibujamos nada.
     if (intensity < 0):
@@ -397,14 +425,22 @@ class Renderer(object):
 
           # Coloración de un shader cargado.
           if (self.__active_shader):
-            self.__current_color = self.__active_shader(y=y, x=x)
+            self.__current_color = self.__active_shader(
+              x=x,
+              y=y,
+              width=self.__width,
+              height=self.__height,
+              light=self.__light,
+              coords=(w, u, v),
+              texture_coords=(tA, tB, tC),
+              normal_coords=(nA, nB, nC)
+            )
 
           # Coloración de una textura cargada.
-          else:
-            if (self.__texture):
-              tx = ((tA.x * w) + (tB.x * u) + (tC.x * v))
-              ty = ((tA.y * w) + (tB.y * u) + (tC.y * v))
-              self.__current_color = self.__texture.get_color_with_intensity(tx, ty, intensity)
+          elif (self.__texture):
+            tx = ((tA.x * w) + (tB.x * u) + (tC.x * v))
+            ty = ((tA.y * w) + (tB.y * u) + (tC.y * v))
+            self.__current_color = self.__texture.get_color_with_intensity(tx, ty, intensity)
 
           # Punto del triángulo a dibujar.
           self.gl_vertex(x, y)
@@ -423,6 +459,10 @@ class Renderer(object):
   # Función para cargar un shader al renderer.
   def gl_load_shader(self, shader):
     self.__active_shader = shader
+
+  # Función para cargar un fondo al renderer.
+  def gl_load_background(self, background):
+    self.__framebuffer = background
 
   # Función para renderizar la imagen creada.
   def gl_finish(self, filename="./images/image.bmp"):    
