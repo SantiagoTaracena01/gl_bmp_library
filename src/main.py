@@ -9,7 +9,7 @@ Santiago Taracena Puga (20017)
 from renderer import Renderer
 from texture import Texture
 from vector import Vector
-from shaders import planet_shader
+from shaders import plant_shader, rock_shader
 import time
 import math
 
@@ -22,7 +22,7 @@ if __name__ == "__main__":
 
   # Valores de traslación, escala y rotación del modelo.
   TRANSLATE = (0, 0, 0)
-  SCALE = (0.0025, 0.0025, 0.0025)
+  SCALE = (0.025, 0.025, 0.0025)
   ROTATE = (0, 0, 0)
 
   # Instancia y creación de valores básicos del renderer.
@@ -36,31 +36,57 @@ if __name__ == "__main__":
   # Inicio del tiempo de renderización.
   start = time.time()
 
-  # # Fondo de la imagen o escena.
-  # jungle_background = Texture("./backgrounds/jungle.bmp")
-  # renderer.gl_load_background(jungle_background.pixels)
+  """
+  Fondo de pantalla de la escena.
+  """
 
-  # # Gato.
-  # cat_texture = Texture("./textures/cat_txs.bmp")
-  # renderer.gl_load_texture(cat_texture)
-  # renderer.gl_load_obj("./models/cat.obj", (0.6, -0.65, 0), (1, 1, 1), (0, (-1 * (math.pi / 4)), 0))
+  # Fondo de la imagen o escena.
+  jungle_background = Texture("./backgrounds/jungle.bmp")
+  renderer.gl_load_background(jungle_background.pixels)
 
-  # # Máscara.
-  # mask_texture = Texture("./textures/mask_txs.bmp")
-  # renderer.gl_load_texture(mask_texture)
-  # renderer.gl_load_obj("./models/mask.obj", (-0.525, 0.35, 0), (1, 1, 1), (0, (math.pi / 6), 0))
+  """
+  Modelos con texturas (5)
+  """
 
-  # # Otra máscara lol.
-  # second_mask_texture = Texture("./textures/other_mask_txs.bmp")
-  # renderer.gl_load_texture(second_mask_texture)
-  # renderer.gl_load_obj("./models/other_mask.obj", (0, 0, 0), (100, 100, 100), (0, (-1 * (math.pi / 6)), 0))
+  # Gato.
+  cat_texture = Texture("./textures/cat_txs.bmp")
+  renderer.gl_load_texture(cat_texture)
+  renderer.gl_load_obj("./models/cat.obj", (0.6, -0.65, 0), (1, 1, 1), (0, (-1 * (math.pi / 4)), 0))
 
-  # Proceso de renderización.
-  renderer.gl_load_shader(planet_shader)
-  model_texture = Texture("./textures/model_txs.bmp")
-  renderer.gl_load_texture(model_texture)
-  renderer.gl_load_obj("./models/earth.obj", TRANSLATE, SCALE, ROTATE)
-  filename = renderer.gl_finish("./images/neptune.bmp")
+  # Máscara.
+  mask_texture = Texture("./textures/mask_txs.bmp")
+  renderer.gl_load_texture(mask_texture)
+  renderer.gl_load_obj("./models/mask.obj", (-0.525, 0.35, 0), (1, 1, 1), (0, (math.pi / 6), 0))
+
+  # Otra máscara.
+  second_mask_texture = Texture("./textures/other_mask_txs.bmp")
+  renderer.gl_load_texture(second_mask_texture)
+  renderer.gl_load_obj("./models/other_mask.obj", (2.7, -0.35, 0), (0.95, 0.95, 0.95), ((math.pi / 9), (-1 * (math.pi / 6)), 0))
+
+  # Piedra marrón.
+  rocks_texture = Texture("./textures/rocks_txs.bmp")
+  renderer.gl_load_texture(rocks_texture)
+  renderer.gl_load_obj("./models/rocks.obj", (0.15, -0.9, 0), (0.00075, 0.00075, 0.00075), (0, 0, 0))
+
+  # Calabazas.
+  pumpkins_texture = Texture("./textures/pumpkins_txs.bmp")
+  renderer.gl_load_texture(pumpkins_texture)
+  renderer.gl_load_obj("./models/pumpkins.obj", (-0.45, -0.6, 0), (0.3, 0.3, 0.3), (0, 0, 0))
+
+  """
+  Modelos con shaders (5)
+  """
+
+  # Planta exótica.
+  renderer.gl_load_shader(plant_shader)
+  renderer.gl_load_obj("./models/plant.obj", (-0.65, -0.8, 0), (0.0035, 0.0035, 0.0035), (0, 0, 0))
+
+  # Piedra con shaders.
+  renderer.gl_load_shader(rock_shader)
+  renderer.gl_load_obj("./models/rock.obj", (-0.8, -0.6, 0), (0.003, 0.003, 0.003), ((math.pi / 6), 0, 0))
+
+  # Finalización del renderizado.
+  filename = renderer.gl_finish("./images/scene.bmp")
 
   # Impresión de resultados finales.
   print(f"\nRendering process has been finished in {round((time.time() - start), 4)} seconds! Check {filename}!\n")

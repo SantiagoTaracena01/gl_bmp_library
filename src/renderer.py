@@ -222,10 +222,10 @@ class Renderer(object):
       if (len(face) == 4):
 
         # Cálculo de las caras del cuadrado.
-        first_face = (face[0][0] - 1)
-        second_face = (face[1][0] - 1)
-        third_face = (face[2][0] - 1)
-        fourth_face = (face[3][0] - 1)
+        first_face = (abs(face[0][0]) - 1)
+        second_face = (abs(face[1][0]) - 1)
+        third_face = (abs(face[2][0]) - 1)
+        fourth_face = (abs(face[3][0]) - 1)
 
         # Vértices del cuadrado a dibujar.
         first_vertex = self.__camera.transform_vertex(object_file.vertices[first_face])
@@ -248,17 +248,26 @@ class Renderer(object):
           third_texture_vertex = Vector(*object_file.texture_vertices[third_texture_face])
           fourth_texture_vertex = Vector(*object_file.texture_vertices[fourth_texture_face])
 
-          # Cálculo de las normales de las caras del cuadrado.
-          first_normal_face = (face[0][2] - 1)
-          second_normal_face = (face[1][2] - 1)
-          third_normal_face = (face[2][2] - 1)
-          fourth_normal_face = (face[3][2] - 1)
+          # Vectores normales si el modelo tiene normales.
+          if (object_file.normal_vertices):
 
-          # Vértices de la textura cargada.
-          first_normal_vertex = Vector(*object_file.normal_vertices[first_normal_face])
-          second_normal_vertex = Vector(*object_file.normal_vertices[second_normal_face])
-          third_normal_vertex = Vector(*object_file.normal_vertices[third_normal_face])
-          fourth_normal_vertex = Vector(*object_file.normal_vertices[fourth_normal_face])
+            # Cálculo de las normales de las caras del cuadrado.
+            first_normal_face = (face[0][2] - 1)
+            second_normal_face = (face[1][2] - 1)
+            third_normal_face = (face[2][2] - 1)
+            fourth_normal_face = (face[3][2] - 1)
+
+            # Vértices de la textura cargada.
+            first_normal_vertex = Vector(*object_file.normal_vertices[first_normal_face])
+            second_normal_vertex = Vector(*object_file.normal_vertices[second_normal_face])
+            third_normal_vertex = Vector(*object_file.normal_vertices[third_normal_face])
+            fourth_normal_vertex = Vector(*object_file.normal_vertices[fourth_normal_face])
+
+          else:
+            first_normal_vertex = Vector(0, 0, 0)
+            second_normal_vertex = Vector(0, 0, 0)
+            third_normal_vertex = Vector(0, 0, 0)
+            fourth_normal_vertex = Vector(0, 0, 0)
 
           # Triángulo superior del cuadrado texturizado.
           self.gl_draw_triangle(
@@ -283,9 +292,9 @@ class Renderer(object):
       elif (len(face) == 3):
 
         # Cálculo de las caras del triángulo.
-        first_face = (face[0][0] - 1)
-        second_face = (face[1][0] - 1)
-        third_face = (face[2][0] - 1)
+        first_face = (abs(face[0][0]) - 1)
+        second_face = (abs(face[1][0]) - 1)
+        third_face = (abs(face[2][0]) - 1)
 
         # Vértices del triángulo a dibujar.
         first_vertex = self.__camera.transform_vertex(object_file.vertices[first_face])
@@ -305,15 +314,23 @@ class Renderer(object):
           second_texture_vertex = Vector(*object_file.texture_vertices[second_texture_face])
           third_texture_vertex = Vector(*object_file.texture_vertices[third_texture_face])
 
-          # Cálculo de las normales de las caras del triángulo.
-          first_normal_face = (face[0][2] - 1)
-          second_normal_face = (face[1][2] - 1)
-          third_normal_face = (face[2][2] - 1)
+          # Vectores normales si el modelo tiene normales.
+          if (object_file.normal_vertices):
 
-          # Vértices de las normales del triángulo a dibujar.
-          first_normal_vertex = Vector(*object_file.normal_vertices[first_normal_face])
-          second_normal_vertex = Vector(*object_file.normal_vertices[second_normal_face])
-          third_normal_vertex = Vector(*object_file.normal_vertices[third_normal_face])
+            # Cálculo de las normales de las caras del cuadrado.
+            first_normal_face = (face[0][2] - 1)
+            second_normal_face = (face[1][2] - 1)
+            third_normal_face = (face[2][2] - 1)
+
+            # Vértices de la textura cargada.
+            first_normal_vertex = Vector(*object_file.normal_vertices[first_normal_face])
+            second_normal_vertex = Vector(*object_file.normal_vertices[second_normal_face])
+            third_normal_vertex = Vector(*object_file.normal_vertices[third_normal_face])
+
+          else:
+            first_normal_vertex = Vector(0, 0, 0)
+            second_normal_vertex = Vector(0, 0, 0)
+            third_normal_vertex = Vector(0, 0, 0)
 
           # Triángulo texturizado a dibujar.
           self.gl_draw_triangle(

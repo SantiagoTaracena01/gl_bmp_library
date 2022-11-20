@@ -67,5 +67,17 @@ def planet_shader(**kwargs):
   # Retorno del color del shader.
   return utils.color(r, g, b)
 
-def model_shader():
-  return 0
+# Shader para la planta del proyecto.
+def plant_shader(**kwargs):
+
+  # Parámetros necesarios para el shader.
+  x = kwargs["x"]
+  y = kwargs["y"]
+
+  y_factor = (1 - abs((160 - y) / 160))
+
+  return utils.color(30, round(150 * y_factor), 100)
+
+def rock_shader(**kwargs):
+  
+  return utils.color(75, 75, 75)
