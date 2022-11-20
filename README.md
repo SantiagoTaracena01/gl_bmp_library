@@ -29,4 +29,4 @@ tareas del renderer. Por favor revisar las entregas. ¡Gracias de antemano!
 - SR6: ./src/images/sr6/*.bmp
 - Lab01: ./src/images/polygons.bmp
 - Lab02: ./src/images/neptune.bmp
-- Proyecto final: WIP...
+- Proyecto final: ./src/images/scene.bmp
