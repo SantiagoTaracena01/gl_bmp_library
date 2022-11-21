@@ -18,6 +18,7 @@ Posibles argumentos de un shader:
 """
 
 # Librerías importantes para el desarrollo del archivo.
+import random
 import utils
 
 # Primer shader realizado en clase.
@@ -71,13 +72,25 @@ def planet_shader(**kwargs):
 def plant_shader(**kwargs):
 
   # Parámetros necesarios para el shader.
-  x = kwargs["x"]
   y = kwargs["y"]
 
+  # Factor para el gradiente de la planta.
   y_factor = (1 - abs((160 - y) / 160))
 
+  # Retorno del color con el gradiente incluido.
   return utils.color(30, round(150 * y_factor), 100)
 
 def rock_shader(**kwargs):
-  
-  return utils.color(75, 75, 75)
+
+  y = kwargs["y"]
+  y_factor = (1 - abs((400 - y) / 100))
+  print("Y factor", y_factor)
+
+  random_value = random.random()
+
+  if (random_value <= 0.05):
+    return utils.color(10, 10, 10)
+  elif ((0.05 < random_value <= 0.1) and (y > 360)):
+    return utils.color(200, 200, 200)
+
+  return utils.color(round(75 * y_factor), round(75 * y_factor), round(75 * y_factor))

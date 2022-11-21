@@ -56,12 +56,12 @@ if __name__ == "__main__":
   # Máscara.
   mask_texture = Texture("./textures/mask_txs.bmp")
   renderer.gl_load_texture(mask_texture)
-  renderer.gl_load_obj("./models/mask.obj", (-0.525, 0.35, 0), (1, 1, 1), (0, (math.pi / 6), 0))
+  renderer.gl_load_obj("./models/mask.obj", (-0.525, 0.35, 0), (1.5, 1.5, 1.5), (0, (math.pi / 6), 0))
 
   # Otra máscara.
   second_mask_texture = Texture("./textures/other_mask_txs.bmp")
   renderer.gl_load_texture(second_mask_texture)
-  renderer.gl_load_obj("./models/other_mask.obj", (2.7, -0.35, 0), (0.95, 0.95, 0.95), ((math.pi / 9), (-1 * (math.pi / 6)), 0))
+  renderer.gl_load_obj("./models/other_mask.obj", (3.65, -0.35, 0), (1.5, 1.5, 1.5), ((math.pi / 9), (-1 * (math.pi / 6)), 0))
 
   # Piedra marrón.
   rocks_texture = Texture("./textures/rocks_txs.bmp")
@@ -71,7 +71,12 @@ if __name__ == "__main__":
   # Calabazas.
   pumpkins_texture = Texture("./textures/pumpkins_txs.bmp")
   renderer.gl_load_texture(pumpkins_texture)
-  renderer.gl_load_obj("./models/pumpkins.obj", (-0.45, -0.6, 0), (0.3, 0.3, 0.3), (0, 0, 0))
+  renderer.gl_load_obj("./models/pumpkins.obj", (-0.45, -0.6, 0), (0.45, 0.45, 0.45), (0, 0, 0))
+
+  # Monki :smiling_imp:.
+  monki_texture = Texture("./textures/monki_txs.bmp")
+  renderer.gl_load_texture(monki_texture)
+  renderer.gl_load_obj("./models/monki.obj", (0, 0.05, 0), (0.004, 0.004, 0.004), ((math.pi), ((-1 * math.pi) / 2), (math.pi / 8)))
 
   """
   Modelos con shaders (5)
@@ -79,11 +84,11 @@ if __name__ == "__main__":
 
   # Planta exótica.
   renderer.gl_load_shader(plant_shader)
-  renderer.gl_load_obj("./models/plant.obj", (-0.65, -0.8, 0), (0.0035, 0.0035, 0.0035), (0, 0, 0))
+  renderer.gl_load_obj("./models/plant.obj", (-0.6, -0.75, 0), (0.0045, 0.0045, 0.0045), (0, 0, 0))
 
   # Piedra con shaders.
   renderer.gl_load_shader(rock_shader)
-  renderer.gl_load_obj("./models/rock.obj", (-0.8, -0.6, 0), (0.003, 0.003, 0.003), ((math.pi / 6), 0, 0))
+  renderer.gl_load_obj("./models/rock.obj", (0.1, -0.3, 0), (0.003, 0.003, 0.003), ((math.pi / 6), 0, 0))
 
   # Finalización del renderizado.
   filename = renderer.gl_finish("./images/scene.bmp")
