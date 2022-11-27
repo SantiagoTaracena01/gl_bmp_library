@@ -80,17 +80,45 @@ def plant_shader(**kwargs):
   # Retorno del color con el gradiente incluido.
   return utils.color(30, round(150 * y_factor), 100)
 
+# Shader para la roca gris del proyecto.
 def rock_shader(**kwargs):
 
+  # Parámetros necesarios para el shader.
   y = kwargs["y"]
-  y_factor = (1 - abs((400 - y) / 100))
-  print("Y factor", y_factor)
 
+  # Factor vertical del color de la roca.
+  y_factor = (1 - abs((400 - y) / 100))
+  actual_factor = max(min(y_factor, 1), 0)
+
+  # Valor aleatorio para poner puntos blancos en la roca.
   random_value = random.random()
 
+  # Puntos aleatorios en la roca.
   if (random_value <= 0.05):
     return utils.color(10, 10, 10)
   elif ((0.05 < random_value <= 0.1) and (y > 360)):
     return utils.color(200, 200, 200)
 
-  return utils.color(round(75 * y_factor), round(75 * y_factor), round(75 * y_factor))
+  # Retorno del gris del gradiente vertical de la roca.
+  return utils.color(round(75 * actual_factor), round(75 * actual_factor), round(75 * actual_factor))
+
+# Shader para el pino del proyecto.
+def spruce_shader(**kwargs):
+
+  # Parámetros necesarios para el shader.
+  y = kwargs["y"]
+
+  # Factor vertical del color del pino.
+  y_factor = (1 - abs((425 - y) / 350))
+
+  # Selección de un color aleatorio para frondosidad.
+  if (random.random() < 0.1):
+    return random.choice((
+      utils.color(45, 145, 170),
+      utils.color(50, 150, 175),
+      utils.color(55, 155, 180),
+      utils.color(60, 160, 185),
+    ))
+
+  # Color del pino según la gradiente vertical.
+  return utils.color(50, round(150 * y_factor), round(175 * y_factor))

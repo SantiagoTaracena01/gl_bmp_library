@@ -9,7 +9,7 @@ Santiago Taracena Puga (20017)
 from renderer import Renderer
 from texture import Texture
 from vector import Vector
-from shaders import plant_shader, rock_shader
+from shaders import plant_shader, rock_shader, spruce_shader
 import time
 import math
 
@@ -89,6 +89,10 @@ if __name__ == "__main__":
   # Piedra con shaders.
   renderer.gl_load_shader(rock_shader)
   renderer.gl_load_obj("./models/rock.obj", (0.1, -0.3, 0), (0.003, 0.003, 0.003), ((math.pi / 6), 0, 0))
+
+  # Pino.
+  renderer.gl_load_shader(spruce_shader)
+  renderer.gl_load_obj("./models/spruce.obj", (0.3, -0.15, 0), (0.035, 0.035, 0.035), (((-1 * math.pi) / 2), 0, 0))
 
   # Finalización del renderizado.
   filename = renderer.gl_finish("./images/scene.bmp")
